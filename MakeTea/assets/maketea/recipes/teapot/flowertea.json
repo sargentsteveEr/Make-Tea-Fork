@@ -1,0 +1,377 @@
+﻿[
+  {
+    "code": "heathertea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-heather-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-heather",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 60,
+    "maxTemperature": 80
+  },
+  {
+    "code": "catminttea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-catmint-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-catmint",
+      "litres": 1
+    },
+    "duration": 2.5,
+    "minTemperature": 40,
+    "maxTemperature": 60
+  },
+  {
+    "code": "cornflowertea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-cornflower-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-cornflower",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 70,
+    "maxTemperature": 90
+  },
+  {
+    "code": "cowparsleytea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-cowparsley-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-cowparsley",
+      "litres": 1
+    },
+    "duration": 1.5,
+    "minTemperature": 80,
+    "maxTemperature": 100
+  },
+  {
+    "code": "westerngorsetea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-westerngorse-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-westerngorse",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 50,
+    "maxTemperature": 70
+  },
+  {
+    "code": "edelweisstea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-edelweiss-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-edelweiss",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 50,
+    "maxTemperature": 80
+  },
+  {
+    "code": "forgetmenottea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-forgetmenot-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-forgetmenot",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 60,
+    "maxTemperature": 80
+  },
+  {
+    "code": "goldenpoppytea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-goldenpoppy-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-goldenpoppy",
+      "litres": 1
+    },
+    "duration": 4,
+    "minTemperature": 35,
+    "maxTemperature": 40
+  },
+  {
+    "code": "horsetailtea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-horsetail-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-horsetail",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 60,
+    "maxTemperature": 80
+  },
+  {
+    "code": "lilyofthevalleytea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-lilyofthevalley-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-lilyofthevalley",
+      "litres": 1
+    },
+    "duration": 2,
+    "minTemperature": 50,
+    "maxTemperature": 70
+  },
+  {
+    "code": "lupinetea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-lupine-*-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-lupine",
+      "litres": 1
+    },
+    "duration": 2,
+    "minTemperature": 50,
+    "maxTemperature": 70
+  },
+  {
+    "code": "orangemallowtea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-orangemallow-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-orangemallow",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 50,
+    "maxTemperature": 80
+  },
+  {
+    "code": "rafflesiatea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion",
+        "quantity": 2
+      },
+      {
+        "type": "block",
+        "code": "game:flower-rafflesia-*",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-rafflesia",
+      "litres": 2
+    },
+    "duration": 3,
+    "minTemperature": 70,
+    "maxTemperature": 90
+  },
+  {
+    "code": "redtopgrasstea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-redtopgrass-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-redtopgrass",
+      "litres": 1
+    },
+    "duration": 1,
+    "minTemperature": 50,
+    "maxTemperature": 80
+  },
+  {
+    "code": "wilddaisytea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-wilddaisy-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-wilddaisy",
+      "litres": 1
+    },
+    "duration": 2,
+    "minTemperature": 50,
+    "maxTemperature": 60
+  },
+  {
+    "code": "woadtea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-woad-free",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-woad",
+      "litres": 1
+    },
+    "duration": 3,
+    "minTemperature": 80,
+    "maxTemperature": 90
+  },
+  {
+    "code": "crotontea",
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      {
+        "type": "block",
+        "code": "game:flower-croton-*",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "teaportion-croton",
+      "litres": 1
+    },
+    "duration": 1.5,
+    "minTemperature": 60,
+    "maxTemperature": 90
+  }
+]

@@ -1,0 +1,493 @@
+﻿using System;
+using System.Collections.Generic;
+using Vintagestory.API.Common;
+using Vintagestory.API;
+using System.IO;
+using Newtonsoft.Json.Linq;
+using Vintagestory.API.Server;
+using Vintagestory.GameContent;
+using Vintagestory.API.Util;
+using Vintagestory.API.MathTools;
+using System.Linq;
+
+namespace MakeTea
+{
+    [DocumentAsJson]
+    public class TeapotRecipeIngredient: CraftingRecipeIngredient
+    {
+        public bool Matches(ItemStack slot, out float outsize)
+        {
+            outsize = slot?.StackSize ?? 0;
+            if (slot == null) return false;
+            if (slot.Collectible?.IsLiquid() ?? false) {
+                WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slot);
+                outsize /= props.ItemsPerLitre;
+            }
+            outsize /= Quantity;
+            return slot.Collectible?.WildCardMatch(Code) ?? false;
+        }
+    }
+
+    [DocumentAsJson]
+    public class TeapotOutputStack : JsonItemStack
+    {
+        [DocumentAsJson]
+        public float Litres;
+
+        public override void FromBytes(BinaryReader reader, IClassRegistryAPI instancer)
+        {
+            base.FromBytes(reader, instancer);
+            Litres = reader.ReadSingle();
+        }
+
+        public override void ToBytes(BinaryWriter writer)
+        {
+            base.ToBytes(writer);
+            writer.Write(Litres);
+        }
+
+        public new TeapotOutputStack Clone()
+        {
+            TeapotOutputStack teapotOutputStack = new TeapotOutputStack
+            {
+                Code = Code.Clone(),
+                ResolvedItemstack = ResolvedItemstack?.Clone(),
+                StackSize = StackSize,
+                Type = Type,
+                Litres = Litres
+            };
+            if (Attributes != null)
+            {
+                teapotOutputStack.Attributes = Attributes.Clone();
+            }
+
+            return teapotOutputStack;
+        }
+    }
+
+    [DocumentAsJson]
+    public class TeapotRecipe : IByteSerializable, IRecipeBase<TeapotRecipe>
+    {
+        [DocumentAsJson] public int RecipeId;
+
+        /// <summary>
+        /// <!--<jsonoptional>Required</jsonoptional>-->
+        /// Defines the set of ingredients used inside the teapot. Teapots can have a maximum of one item and one liquid ingredient.
+        /// </summary>
+        [DocumentAsJson] public TeapotRecipeIngredient[] Ingredients;
+
+        /// <summary>
+        /// <!--<jsonoptional>Required</jsonoptional>-->
+        /// The final output of this recipe.
+        /// </summary>
+        [DocumentAsJson] public TeapotOutputStack Output;
+
+        /// <summary>
+        /// <!--<jsonoptional>Obsolete</jsonoptional>-->
+        /// Unused. Defines a name for the recipe.
+        /// </summary>
+        [DocumentAsJson] public AssetLocation Name { get; set; }
+
+        /// <summary>
+        /// <!--<jsonoptional>Optional</jsonoptional><jsondefault>True</jsondefault>-->
+        /// Should this recipe be loaded by the recipe loader?
+        /// </summary>
+        [DocumentAsJson] public bool Enabled { get; set; } = true;
+
+        IRecipeIngredient[] IRecipeBase<TeapotRecipe>.Ingredients => Ingredients;
+
+        IRecipeOutput IRecipeBase<TeapotRecipe>.Output => Output;
+
+        /// <summary>
+        /// <!--<jsonoptional>Required</jsonoptional>-->
+        /// A code for this recipe, used to create an entry in the handbook.
+        /// </summary>
+        [DocumentAsJson] public string Code;
+
+        /// <summary>
+        /// <!--<jsonoptional>Required</jsonoptional>-->
+        /// Defines the time it takes for the tea to brew
+        /// </summary>
+        [DocumentAsJson] public double Duration;
+        /// <summary>
+        /// <!--<jsonoptional>Required</jsonoptional>-->
+        /// Defines the lowest temperature at which tea can brew at full quality
+        /// </summary>
+        [DocumentAsJson] public double MinTemperature;
+        /// <summary>
+        /// <!--<jsonoptional>Required</jsonoptional>-->
+        /// Defines the highest temperature at which tea can brew at full quality
+        /// </summary>
+        [DocumentAsJson] public double MaxTemperature;
+
+        public static double TEMPERATURE_ACCURACY_RATIO = 10.0;
+        public static float MIN_QUALITY = 0.25f;
+
+
+        public void ToBytes(BinaryWriter writer)
+        {
+            writer.Write(Code);
+            writer.Write(Ingredients.Length);
+            for (int i = 0; i < Ingredients.Length; i++)
+            {
+                Ingredients[i].ToBytes(writer);
+            }
+
+            Output.ToBytes(writer);
+            writer.Write(Duration);
+            writer.Write(MinTemperature);
+            writer.Write(MaxTemperature);
+        }
+
+        public void FromBytes(BinaryReader reader, IWorldAccessor resolver)
+        {
+            Code = reader.ReadString();
+            Ingredients = new TeapotRecipeIngredient[reader.ReadInt32()];
+            for (int i = 0; i < Ingredients.Length; i++)
+            {
+                Ingredients[i] = new TeapotRecipeIngredient();
+                Ingredients[i].FromBytes(reader, resolver);
+                Ingredients[i].Resolve(resolver, "Teapot Recipe (FromBytes)");
+            }
+
+            Output = new TeapotOutputStack();
+            Output.FromBytes(reader, resolver.ClassRegistry);
+            Output.Resolve(resolver, "Teapot Recipe (FromBytes)");
+            Duration = reader.ReadDouble();
+            MinTemperature = reader.ReadDouble();
+            MaxTemperature = reader.ReadDouble();
+        }
+
+        public bool Matches(ItemStack[] stacks, float temperature, out float outsize)
+		{
+			outsize = 0;
+			if (temperature <= Teapot.ROOM_TEMPERATURE) return false;
+			if (Ingredients == null || Ingredients.Length == 0) return false;
+			if (stacks == null || stacks.Length < Ingredients.Length) return false;
+
+			bool TryOrder(int a, int b, out float size)
+			{
+				size = 0f;
+				if (!Ingredients[0].Matches(stacks[a], out float s0)) return false;
+				if (!Ingredients[1].Matches(stacks[b], out float s1)) return false;
+				if (Math.Abs(s0 - s1) > 1e-4f) return false;
+				size = s0;
+				return true;
+			}
+
+			if (Ingredients.Length == 2)
+			{
+				if (TryOrder(0, 1, out outsize)) return true;
+				if (TryOrder(1, 0, out outsize)) return true;
+				return false;
+			}
+
+			// fallback: original strict order for 3+ ingredients
+			float total;
+			if (!Ingredients[0].Matches(stacks[0], out total)) return false;
+			for (int i = 1; i < Ingredients.Length; i++)
+			{
+				if (!Ingredients[i].Matches(stacks[i], out float slotSize) || Math.Abs(slotSize - total) > 1e-4f) return false;
+			}
+			outsize = total;
+			return true;
+		}
+
+        public double TemperatureMatch(double temperature)
+        {
+            double distance = Math.Max(0.0, MinTemperature - temperature) + Math.Max(0.0, temperature - MaxTemperature);
+            return 1.0 - Math.Min(1.0, distance / TEMPERATURE_ACCURACY_RATIO);
+        }
+
+        private NatFloat GetTransitionDuration()
+        {
+            var props = Output.ResolvedItemstack.Collectible.TransitionableProps;
+            foreach (var prop in props)
+            {
+                if (prop.Type == EnumTransitionType.Perish)
+                    return prop.TransitionHours;
+            }
+            return NatFloat.Zero;
+        }
+
+        public bool TryCraft(InventoryBase slots, float temperature, double craftingTime, double quality) {
+            float outsize = 0;
+            ItemStack[] stacks = slots.Select(s => s.Itemstack).ToArray();
+            if (craftingTime < Duration || !Matches(stacks, temperature, out outsize) || outsize == 0) return false;
+            for (var i = 0; i < slots.Count; i++)
+            {
+                var quantity = Ingredients[i].Quantity;
+                var stack = slots[i].Itemstack;
+                if (stack.Collectible.IsLiquid())
+                {
+                    WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
+                    quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
+                }
+                stack.StackSize -= (int)MathF.Round((float)quantity * outsize);
+                if (stack.StackSize == 0)
+                    slots[i].Itemstack = null;
+                slots[i].MarkDirty();
+            }
+            var outputStack = Output.ResolvedItemstack.Clone();
+            outputStack.StackSize = (int)(Output.Litres * BlockLiquidContainerBase.GetContainableProps(outputStack).ItemsPerLitre * outsize);
+            double transition = (1.0 - Math.Clamp(quality / Duration, MIN_QUALITY, 1.0)) * GetTransitionDuration().avg;
+            outputStack.Collectible.SetTransitionState(outputStack, EnumTransitionType.Perish, (float)transition);
+            slots[0].Itemstack = outputStack;
+            return true;
+        }
+
+        public Dictionary<string, string[]> GetNameToCodeMapping(IWorldAccessor world)
+        {
+            Dictionary<string, string[]> mappings = new Dictionary<string, string[]>();
+
+            if (Ingredients == null || Ingredients.Length == 0) return mappings;
+
+            foreach (var ingred in Ingredients)
+            {
+                if (!ingred.Code.Path.Contains('*')) continue;
+
+                int wildcardStartLen = ingred.Code.Path.IndexOf('*');
+                int wildcardEndLen = ingred.Code.Path.Length - wildcardStartLen - 1;
+
+                List<string> codes = new List<string>();
+
+                if (ingred.Type == EnumItemClass.Block)
+                {
+                    for (int i = 0; i < world.Blocks.Count; i++)
+                    {
+                        if (world.Blocks[i].Code == null || world.Blocks[i].IsMissing) continue;
+
+                        if (WildcardUtil.Match(ingred.Code, world.Blocks[i].Code))
+                        {
+                            string code = world.Blocks[i].Code.Path.Substring(wildcardStartLen);
+                            string codepart = code.Substring(0, code.Length - wildcardEndLen);
+                            if (ingred.AllowedVariants != null && !ingred.AllowedVariants.Contains(codepart)) continue;
+
+                            codes.Add(codepart);
+
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < world.Items.Count; i++)
+                    {
+                        if (world.Items[i].Code == null || world.Items[i].IsMissing) continue;
+
+                        if (WildcardUtil.Match(ingred.Code, world.Items[i].Code))
+                        {
+                            string code = world.Items[i].Code.Path.Substring(wildcardStartLen);
+                            string codepart = code.Substring(0, code.Length - wildcardEndLen);
+                            if (ingred.AllowedVariants != null && !ingred.AllowedVariants.Contains(codepart)) continue;
+
+                            codes.Add(codepart);
+                        }
+                    }
+                }
+
+                mappings[ingred.Name ?? "wildcard" + mappings.Count] = codes.ToArray();
+            }
+
+            return mappings;
+        }
+
+        public bool Resolve(IWorldAccessor world, string sourceForErrorLogging)
+        {
+            bool ok = true;
+
+            for (int i = 0; i < Ingredients.Length; i++)
+            {
+                var ingred = Ingredients[i];
+                bool iOk = ingred.Resolve(world, sourceForErrorLogging);
+                ok &= iOk;
+            }
+
+            ok &= Output.Resolve(world, sourceForErrorLogging);
+
+            if (ok)
+            {
+                var lprops = BlockLiquidContainerBase.GetContainableProps(Output.ResolvedItemstack);
+                if (lprops != null)
+                {
+                    if (Output.Litres < 0)
+                    {
+                        if (Output.Quantity > 0)
+                        {
+                            world.Logger.Warning("Barrel recipe {0}, output {1} does not define a litres attribute but a stacksize, will assume stacksize=litres for backwards compatibility.", sourceForErrorLogging, Output.Code);
+                            Output.Litres = Output.Quantity;
+                        }
+                        else Output.Litres = 1;
+
+                    }
+
+                    Output.Quantity = (int)(lprops.ItemsPerLitre * Output.Litres);
+                }
+            }
+
+            return ok;
+        }
+
+        public TeapotRecipe Clone()
+        {
+            TeapotRecipe copy = new TeapotRecipe();
+            copy.RecipeId = RecipeId;
+            copy.Ingredients = Ingredients;
+            copy.Output = Output;
+            copy.Name = Name;
+            copy.Enabled = Enabled;
+            copy.Code = Code;
+            copy.Duration = Duration;
+            copy.MinTemperature = MinTemperature;
+            copy.MaxTemperature = MaxTemperature;
+            return copy;
+        }
+    }
+
+    public class TeapotRecipeLoader
+    {
+        public void LoadRecipes<T>(ICoreServerAPI api, string name, string path, Action<T> RegisterMethod) where T : IRecipeBase<T>
+        {
+            Dictionary<AssetLocation, JToken> many = api.Assets.GetMany<JToken>(api.Server.Logger, path);
+            int num = 0;
+            int quantityRegistered = 0;
+            int quantityIgnored = 0;
+            foreach (KeyValuePair<AssetLocation, JToken> item in many)
+            {
+                if (item.Value is JObject)
+                {
+                    LoadGenericRecipe(api, name, item.Key, item.Value.ToObject<T>(item.Key.Domain), RegisterMethod, ref quantityRegistered, ref quantityIgnored);
+                    num++;
+                }
+
+                if (!(item.Value is JArray))
+                {
+                    continue;
+                }
+
+                foreach (JToken item2 in item.Value as JArray)
+                {
+                    LoadGenericRecipe(api, name, item.Key, item2.ToObject<T>(item.Key.Domain), RegisterMethod, ref quantityRegistered, ref quantityIgnored);
+                    num++;
+                }
+            }
+
+            api.World.Logger.Event("{0} {1}s loaded{2}", quantityRegistered, name, (quantityIgnored > 0) ? $" ({quantityIgnored} could not be resolved)" : "");
+        }
+
+        private void LoadGenericRecipe<T>(ICoreServerAPI api, string className, AssetLocation path, T recipe, Action<T> RegisterMethod, ref int quantityRegistered, ref int quantityIgnored) where T : IRecipeBase<T>
+        {
+            if (!recipe.Enabled)
+            {
+                return;
+            }
+
+            if (recipe.Name == null)
+            {
+                recipe.Name = path;
+            }
+
+            ref T reference = ref recipe;
+            T val = default(T);
+            if (val == null)
+            {
+                val = reference;
+                reference = ref val;
+            }
+
+            Dictionary<string, string[]> nameToCodeMapping = reference.GetNameToCodeMapping(api.World);
+            if (nameToCodeMapping.Count > 0)
+            {
+                List<T> list = new List<T>();
+                int num = 0;
+                bool flag = true;
+                foreach (KeyValuePair<string, string[]> item in nameToCodeMapping)
+                {
+                    num = ((!flag) ? (num * item.Value.Length) : item.Value.Length);
+                    flag = false;
+                }
+
+                flag = true;
+                foreach (KeyValuePair<string, string[]> item2 in nameToCodeMapping)
+                {
+                    string key = item2.Key;
+                    string[] value = item2.Value;
+                    for (int i = 0; i < num; i++)
+                    {
+                        T val2;
+                        if (flag)
+                        {
+                            list.Add(val2 = recipe.Clone());
+                        }
+                        else
+                        {
+                            val2 = list[i];
+                        }
+
+                        if (val2.Ingredients != null)
+                        {
+                            IRecipeIngredient[] ingredients = val2.Ingredients;
+                            foreach (IRecipeIngredient recipeIngredient in ingredients)
+                            {
+                                if (recipeIngredient.Name == key)
+                                {
+                                    recipeIngredient.Code = recipeIngredient.Code.CopyWithPath(recipeIngredient.Code.Path.Replace("*", value[i % value.Length]));
+                                }
+                            }
+                        }
+
+                        val2.Output.FillPlaceHolder(item2.Key, value[i % value.Length]);
+                    }
+
+                    flag = false;
+                }
+
+                if (list.Count == 0)
+                {
+                    api.World.Logger.Warning("{1} file {0} make uses of wildcards, but no blocks or item matching those wildcards were found.", path, className);
+                }
+
+                {
+                    foreach (T item3 in list)
+                    {
+                        T current3 = item3;
+                        ref T reference2 = ref current3;
+                        val = default(T);
+                        if (val == null)
+                        {
+                            val = reference2;
+                            reference2 = ref val;
+                        }
+
+                        if (!reference2.Resolve(api.World, className + " " + path))
+                        {
+                            quantityIgnored++;
+                            continue;
+                        }
+
+                        RegisterMethod(current3);
+                        quantityRegistered++;
+                    }
+
+                    return;
+                }
+            }
+
+            ref T reference3 = ref recipe;
+            val = default(T);
+            if (val == null)
+            {
+                val = reference3;
+                reference3 = ref val;
+            }
+
+            if (!reference3.Resolve(api.World, className + " " + path))
+            {
+                quantityIgnored++;
+                return;
+            }
+
+            RegisterMethod(recipe);
+            quantityRegistered++;
+        }
+    }
+}

@@ -1,0 +1,27 @@
+{
+	"editor": {
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+	},
+	"elements": [
+		{
+			"name": "Content",
+			"from": [ 7.0, 0.1, 7.0 ],
+			"to": [ 9.0, 1.1, 9.0 ],
+			"renderPass": 4,
+			"rotationOrigin": [ 8.0, 0.0, 8.0 ],
+			"faces": {
+				"up": {
+					"texture": "#null",
+					"uv": [ 0.0, 0.0, 2.0, 2.0 ]
+				}
+			}
+		}
+	]
+}

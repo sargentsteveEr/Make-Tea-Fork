@@ -1,0 +1,16 @@
+{
+  "type": "code",
+  "modid": "maketea",
+  "name": "MakeTea",
+  "authors": [
+    "urm",
+  ],
+  "contributors": [
+    "sargentsteveEr",
+  ],
+  "description": "Make clay teapots and mugs, brew tea and drink it",
+  "version": "0.4",
+  "dependencies": {
+    "game": ""
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "code": "mug",
+  "classByType": {
+    "*-fired-*": "MakeTea_Mug"
+  },
+  "behaviors": [
+    {
+      "name": "GroundStorable",
+      "properties": {
+        "layout": "Quadrants",
+        "collisionBox": {
+          "x1": 0,
+          "y1": 0,
+          "z1": 0,
+          "x2": 1,
+          "y2": 0.125,
+          "z2": 1
+        }
+      }
+    },
+    {
+      "name": "RightClickPickup"
+    },
+    {
+      "name": "Unplaceable",
+      "__comment": "The ground storable obsoletes this being a block. Should be an item, but is kept a block for backwards compatibility"
+    }
+  ],
+  "variantgroups": [
+    {
+      "code": "color",
+      "states": [ "blue", "fire", "black", "brown", "cream", "gray", "orange", "red", "tan" ]
+    },
+    {
+      "code": "state",
+      "states": [ "raw", "fired" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+  "skipVariants": [
+    "mug-black-raw-*",
+    "mug-brown-raw-*",
+    "mug-cream-raw-*",
+    "mug-gray-raw-*",
+    "mug-orange-raw-*",
+    "mug-tan-raw-*"
+  ],
+  "attributes": {
+    "shelvable": true,
+    "onshelfTransform": {
+      "translation": {
+        "x": 0,
+        "y": -0.15,
+        "z": 0
+      },
+      "scale": 0.7
+    }
+  },
+  "attributesByType": {
+    "mug-red-raw-*": {
+      "beehivekiln": {
+        "0": {
+          "type": "block",
+          "code": "maketea:mug-tan-fired-east"
+        },
+        "1": {
+          "type": "block",
+          "code": "maketea:mug-orange-fired-east"
+        },
+        "2": {
+          "type": "block",
+          "code": "maketea:mug-red-fired-east"
+        },
+        "3": {
+          "type": "block",
+          "code": "maketea:mug-brown-fired-east"
+        }
+      }
+    },
+    "mug-blue-raw-*": {
+      "beehivekiln": {
+        "0": {
+          "type": "block",
+          "code": "maketea:mug-cream-fired-east"
+        },
+        "1": {
+          "type": "block",
+          "code": "maketea:mug-gray-fired-east"
+        },
+        "2": {
+          "type": "block",
+          "code": "maketea:mug-black-fired-east"
+        },
+        "3": {
+          "type": "block",
+          "code": "maketea:mug-black-fired-east"
+        }
+      }
+    },
+    "mug-fire-raw-*": {
+      "beehivekiln": {
+        "0": {
+          "type": "block",
+          "code": "maketea:mug-fire-fired-east"
+        },
+        "1": {
+          "type": "block",
+          "code": "maketea:mug-fire-fired-east"
+        },
+        "2": {
+          "type": "block",
+          "code": "maketea:mug-fire-fired-east"
+        },
+        "3": {
+          "type": "block",
+          "code": "maketea:mug-fire-fired-east"
+        }
+      }
+    },
+    "*-fired-*": {
+      "liquidContainerProps": {
+        "capacityLitres": 0.2,
+        "allowHeldLiquidTransfer": true,
+        "allowHeating": true,
+        "maxTemperature": 100,
+        "transferSizeLitres": 0.1,
+        "emptyShapeLoc": "shapes/block/clay/mug",
+        "opaqueContentShapeLoc": "shapes/block/clay/mug-content",
+        "liquidContentShapeLoc": "shapes/block/clay/mug-liquidcontent",
+        "liquidMaxYTranslate": 0.2
+      }
+    }
+  },
+  "combustiblePropsByType": {
+    "mug-red-raw-*": {
+      "meltingPoint": 600,
+      "meltingDuration": 45,
+      "smeltedRatio": 1,
+      "smeltingType": "fire",
+      "smeltedStack": {
+        "type": "block",
+        "code": "mug-blue-fired-east"
+      },
+      "requiresContainer": false
+    },
+    "mug-blue-raw-*": {
+      "meltingPoint": 600,
+      "meltingDuration": 45,
+      "smeltedRatio": 1,
+      "smeltingType": "fire",
+      "smeltedStack": {
+        "type": "block",
+        "code": "mug-blue-fired-east"
+      },
+      "requiresContainer": false
+    },
+    "mug-fire-raw-*": {
+      "meltingPoint": 600,
+      "meltingDuration": 45,
+      "smeltedRatio": 1,
+      "smeltingType": "fire",
+      "smeltedStack": {
+        "type": "block",
+        "code": "mug-fire-fired-east"
+      },
+      "requiresContainer": false
+    }
+  },
+  "shapeByType": {
+    "*-north": {
+      "base": "block/clay/mug",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/clay/mug",
+      "rotateY": 270
+    },
+    "*-west": {
+      "base": "block/clay/mug",
+      "rotateY": 90
+    },
+    "*-south": {
+      "base": "block/clay/mug",
+      "rotateY": 180
+    }
+  },
+  "heldTpIdleAnimation": "holdbothhands",
+  "doNotRenderAtLod2": true,
+  "blockmaterial": "Ceramic",
+  "creativeinventory": {
+    "general": [ "mug-*-raw-east", "mug-*-fired-east" ],
+    "decorative": [ "mug-*-raw-east", "mug-*-fired-east" ]
+  },
+  "replaceable": 300,
+  "liquidSelectable": 1,
+  "resistance": 0.75,
+  "maxStackSize": 8,
+  "lightAbsorption": 0,
+  "texturesByType": {
+    "*-fired-*": {
+      "mat": { "base": "game:block/clay/hardened/{color}" }
+    },
+    "*-raw-*": {
+      "mat": { "base": "game:block/clay/{color}clay" }
+    }
+  },
+  "sounds": {
+    "walk": "game:walk/stone",
+
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "sidesolid": {
+    "all": false
+  },
+  "collisionbox": {
+    "x1": 0.25,
+    "y1": 0,
+    "z1": 0.25,
+    "x2": 0.75,
+    "y2": 0.5,
+    "z2": 0.75
+  },
+  "selectionbox": {
+    "x1": 0.25,
+    "y1": 0,
+    "z1": 0.25,
+    "x2": 0.75,
+    "y2": 0.5,
+    "z2": 0.75
+  },
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": -4.2,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.25,
+      "z": 0.5
+    },
+    "scale": 2.94
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.81,
+      "y": -0.72,
+      "z": -0.41
+    },
+    "rotation": {
+      "x": 10,
+      "y": -155,
+      "z": 86
+    },
+    "scale": 1
+  }
+}

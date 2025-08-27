@@ -1,0 +1,359 @@
+{
+  "code": "teaportion",
+  "variantGroups": [
+    {
+      "code": "herb",
+      "states": [ "lupine", "rafflesia", "croton", "heather", "catmint", "cornflower", "cowparsley", "westerngorse", "edelweiss", "forgetmenot", "goldenpoppy", "horsetail", "lilyofthevalley", "orangemallow", "redtopgrass", "wilddaisy", "woad" ]
+    }
+  ],
+  "class": "ItemLiquidPortion",
+  "matterState": "liquid",
+  "attributes": {
+    "handbook": {
+      "ignoreCreativeInvStacks": true
+    },
+    "waterTightContainerProps": {
+      "containable": true,
+      "itemsPerLitre": 100,
+      "texturebytype": {
+        "*-heather": {
+          "base": "game:block/food/pie/fill-saguaro",
+          "alpha": 160
+        },
+        "*-catmint": {
+          "base": "game:block/food/pie/fill-whitecurrant",
+          "alpha": 180
+        },
+        "*-cornflower": {
+          "base": "game:block/food/pie/fill-apple",
+          "alpha": 160
+        },
+        "*-cowparsley": {
+          "base": "game:block/food/pie/fill-pineapple",
+          "alpha": 100
+        },
+        "*-westerngorse": {
+          "base": "game:block/food/pie/fill-gooseberry",
+          "alpha": 100
+        },
+        "*-edelweiss": {
+          "base": "game:block/food/pie/fill-cassava",
+          "alpha": 80
+        },
+        "*-forgetmenot": {
+          "base": "game:block/liquid/milkportion",
+          "alpha": 30
+        },
+        "*-goldenpoppy": {
+          "base": "game:block/food/pie/fill-mushroomblack",
+          "alpha": 180
+        },
+        "*-horsetail": {
+          "base": "game:block/food/pie/fill-olive",
+          "alpha": 100
+        },
+        "*-lilyofthevalley": {
+          "base": "game:block/food/pie/fill-walnut",
+          "alpha": 80
+        },
+        "*-lupine": {
+          "base": "game:block/food/pie/fill-carrot",
+          "alpha": 80
+        },
+        "*-orangemallow": {
+          "base": "game:block/food/pie/fill-orange",
+          "alpha": 80
+        },
+        "*-rafflesia": {
+          "base": "game:block/food/pie/fill-plum",
+          "alpha": 180
+        },
+        "*-redtopgrass": {
+          "base": "game:block/food/pie/fill-cabbage",
+          "alpha": 40
+        },
+        "*-wilddaisy": {
+          "base": "game:block/food/pie/fill-turnip",
+          "alpha": 80
+        },
+        "*-woad": {
+          "base": "game:block/food/pie/fill-mixedcheese",
+          "alpha": 80
+        },
+        "*-croton": {
+          "base": "game:block/food/pie/fill-parsnip",
+          "alpha": 180
+        }
+      },
+      "allowSpill": true,
+      "whenSpilled": {
+        "action": "DropContents",
+        "stack": {
+          "type": "item",
+          "code": "teaportion-{herb}"
+        }
+      },
+      "nutritionPropsPerLitreByType": {
+        "*-heather": {
+          "foodCategory": "NoNutrition",
+          "satiety": 20,
+          "intoxication": 0,
+          "health": 0
+        },
+        "*-catmint": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0.005,
+          "health": 0
+        },
+        "*-cornflower": {
+          "foodCategory": "NoNutrition",
+          "satiety": 20,
+          "intoxication": 0,
+          "health": 0.5
+        },
+        "*-cowparsley": {
+          "foodCategory": "NoNutrition",
+          "satiety": 40,
+          "intoxication": 0,
+          "health": -2
+        },
+        "*-westerngorse": {
+          "foodCategory": "Protein",
+          "satiety": 30,
+          "intoxication": 0,
+          "health": 0
+        },
+        "*-edelweiss": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0,
+          "health": 1
+        },
+        "*-forgetmenot": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0.05,
+          "health": 2
+        },
+        "*-goldenpoppy": {
+          "foodCategory": "Fruit",
+          "satiety": 10,
+          "intoxication": 1,
+          "health": 7
+        },
+        "*-horsetail": {
+          "foodCategory": "Vegetable",
+          "satiety": 10,
+          "intoxication": 0.01,
+          "health": 1
+        },
+        "*-lilyofthevalley": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0,
+          "health": 0
+        },
+        "*-lupine": {
+          "foodCategory": "Protein",
+          "satiety": 20,
+          "intoxication": 0,
+          "health": 0
+        },
+        "*-orangemallow": {
+          "foodCategory": "NoNutrition",
+          "satiety": 10,
+          "intoxication": 0,
+          "health": 0.25
+        },
+        "*-rafflesia": {
+          "foodCategory": "NoNutrition",
+          "satiety": 40,
+          "intoxication": 0.03,
+          "health": 0
+        },
+        "*-redtopgrass": {
+          "foodCategory": "NoNutrition",
+          "satiety": 10,
+          "intoxication": 0,
+          "health": 0
+        },
+        "*-wilddaisy": {
+          "foodCategory": "Fruit",
+          "satiety": 30,
+          "intoxication": 0,
+          "health": 0.5
+        },
+        "*-woad": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0,
+          "health": 1.5
+        },
+        "*-croton": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0,
+          "health": 0.5
+        }
+      }
+    },
+    "makeTeaPortionPropsByType": {
+      "*-catmint": {
+        "stabilityGain": 0.1
+      },
+      "*-goldenpoppy": {
+        "stabilityGain": 0.15
+      },
+      "*-lilyofthevalley": {
+        "stabilityGain": 0.05
+      },
+      "*-woad": {
+        "stabilityGain": 0.075
+      }
+    }
+  },
+  "shape": { "base": "game:item/liquid" },
+  "creativeinventoryStacks": [
+    {
+      "tabs": [ "general", "liquids" ],
+      "stacks": [
+        {
+          "type": "block",
+          "code": "game:woodbucket",
+          "attributes": {
+            "ucontents": [
+              {
+                "type": "item",
+                "code": "maketea:teaportion-{herb}",
+                "states": [ "lupine", "rafflesia", "croton", "heather", "catmint", "cornflower", "cowparsley", "westerngorse", "edelweiss", "forgetmenot", "goldenpoppy", "horsetail", "lilyofthevalley", "orangemallow", "redtopgrass", "wilddaisy", "woad" ],
+                "makefull": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "texturebytype": {
+    "*-heather": {
+      "base": "game:block/food/pie/fill-saguaro",
+      "alpha": 160
+    },
+    "*-catmint": {
+      "base": "game:block/food/pie/fill-whitecurrant",
+      "alpha": 180
+    },
+    "*-cornflower": {
+      "base": "game:block/food/pie/fill-apple",
+      "alpha": 160
+    },
+    "*-cowparsley": {
+      "base": "game:block/food/pie/fill-pineapple",
+      "alpha": 100
+    },
+    "*-westerngorse": {
+      "base": "game:block/food/pie/fill-gooseberry",
+      "alpha": 100
+    },
+    "*-edelweiss": {
+      "base": "game:block/food/pie/fill-cassava",
+      "alpha": 80
+    },
+    "*-forgetmenot": {
+      "base": "game:block/liquid/milkportion",
+      "alpha": 30
+    },
+    "*-goldenpoppy": {
+      "base": "game:block/food/pie/fill-mushroomblack",
+      "alpha": 180
+    },
+    "*-horsetail": {
+      "base": "game:block/food/pie/fill-olive",
+      "alpha": 100
+    },
+    "*-lilyofthevalley": {
+      "base": "game:block/food/pie/fill-walnut",
+      "alpha": 80
+    },
+    "*-lupine": {
+      "base": "game:block/food/pie/fill-carrot",
+      "alpha": 80
+    },
+    "*-orangemallow": {
+      "base": "game:block/food/pie/fill-orange",
+      "alpha": 80
+    },
+    "*-rafflesia": {
+      "base": "game:block/food/pie/fill-plum",
+      "alpha": 180
+    },
+    "*-redtopgrass": {
+      "base": "game:block/food/pie/fill-cabbage",
+      "alpha": 40
+    },
+    "*-wilddaisy": {
+      "base": "game:block/food/pie/fill-turnip",
+      "alpha": 80
+    },
+    "*-woad": {
+      "base": "game:block/food/pie/fill-mixedcheese",
+      "alpha": 80
+    },
+    "*-croton": {
+      "base": "game:block/food/pie/fill-parsnip",
+      "alpha": 180
+    }
+  },
+  "maxstacksize": 5000,
+  "materialDensity": 200,
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": 1,
+      "z": 0
+    },
+    "rotation": {
+      "x": 123,
+      "y": -33,
+      "z": -13
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 1.4
+  },
+  "fpHandTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 25,
+      "y": 157,
+      "z": -5
+    }
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.5,
+      "y": -1,
+      "z": -1.4
+    }
+  },
+  "transitionableProps": [
+    {
+      "type": "Perish",
+      "freshHours": { "avg": 1 },
+      "transitionHours": { "avg": 128 },
+      "transitionedStack": {
+        "type": "item",
+        "code": "game:waterportion"
+      },
+      "transitionRatio": 1
+    }
+  ]
+}

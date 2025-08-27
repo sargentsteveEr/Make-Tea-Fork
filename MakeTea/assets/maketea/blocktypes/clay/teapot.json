@@ -1,0 +1,279 @@
+{
+  "code": "teapot",
+  "classByType": {
+    "*-fired-*": "MakeTea_Teapot"
+  },
+  "entityClassByType": {
+    "*-fired-*": "MakeTea_TeapotEntity"
+  },
+  "behaviorsByType": {
+    "*-raw-*": [
+      {
+        "name": "GroundStorable",
+        "properties": {
+          "layout": "SingleCenter"
+        }
+      },
+      {
+        "name": "RightClickPickup"
+      },
+      {
+        "name": "Unplaceable",
+        "__comment": "The ground storable obsoletes this being a block. Should be an item, but is kept a block for backwards compatibility"
+      }
+    ]
+  },
+  "variantgroups": [
+    {
+      "code": "color",
+      "states": [ "blue", "fire", "black", "brown", "cream", "gray", "orange", "red", "tan" ]
+    },
+    {
+      "code": "state",
+      "states": [ "raw", "fired" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+  "skipVariants": [
+    "teapot-black-raw-*",
+    "teapot-brown-raw-*",
+    "teapot-cream-raw-*",
+    "teapot-gray-raw-*",
+    "teapot-orange-raw-*",
+    "teapot-tan-raw-*"
+  ],
+  "attributes": {
+    "shelvable": true,
+    "onshelfTransform": {
+      "translation": {
+        "x": 0,
+        "y": -0.25,
+        "z": 0
+      },
+      "scale": 0.5
+    },
+    "handbookByType": {
+      "*-fired-*": {
+        "groupBy": [ "teapot-*-fired-east" ],
+        "extraSections": [
+          {
+            "title": "maketea:handbook-instruction-title",
+            "text": "maketea:handbook-instruction-text"
+          }
+        ]
+      }
+    }
+  },
+  "attributesByType": {
+    "teapot-red-raw-*": {
+      "beehivekiln": {
+        "0": {
+          "type": "block",
+          "code": "maketea:teapot-tan-fired-east"
+        },
+        "1": {
+          "type": "block",
+          "code": "maketea:teapot-orange-fired-east"
+        },
+        "2": {
+          "type": "block",
+          "code": "maketea:teapot-red-fired-east"
+        },
+        "3": {
+          "type": "block",
+          "code": "maketea:teapot-brown-fired-east"
+        }
+      }
+    },
+    "teapot-blue-raw-*": {
+      "beehivekiln": {
+        "0": {
+          "type": "block",
+          "code": "maketea:teapot-cream-fired-east"
+        },
+        "1": {
+          "type": "block",
+          "code": "maketea:teapot-gray-fired-east"
+        },
+        "2": {
+          "type": "block",
+          "code": "maketea:teapot-black-fired-east"
+        },
+        "3": {
+          "type": "block",
+          "code": "maketea:teapot-black-fired-east"
+        }
+      }
+    },
+    "teapot-fire-raw-*": {
+      "beehivekiln": {
+        "0": {
+          "type": "block",
+          "code": "maketea:teapot-fire-fired-east"
+        },
+        "1": {
+          "type": "block",
+          "code": "maketea:teapot-fire-fired-east"
+        },
+        "2": {
+          "type": "block",
+          "code": "maketea:teapot-fire-fired-east"
+        },
+        "3": {
+          "type": "block",
+          "code": "maketea:teapot-fire-fired-east"
+        }
+      }
+    },
+    "teapot-*-fired-*": {
+      "allowHeating": true,
+      "maxTemperature": 100,
+      "liquidContainerProps": {
+        "capacityLitres": 2,
+        "transferSizeLitres":  0.2,
+        "allowHeldLiquidTransfer": true,
+        "emptyShapeLoc": "shapes/block/clay/teapot",
+        "opaqueContentShapeLoc": "game:shapes/block/basic/nothing",
+        "liquidContentShapeLoc": "game:shapes/block/basic/nothing"
+      }
+    }
+  },
+  "combustiblePropsByType": {
+    "teapot-red-raw-*": {
+      "meltingPoint": 600,
+      "meltingDuration": 45,
+      "smeltedRatio": 1,
+      "smeltingType": "fire",
+      "smeltedStack": {
+        "type": "block",
+        "code": "teapot-blue-fired-east"
+      },
+      "requiresContainer": false
+    },
+    "teapot-blue-raw-*": {
+      "meltingPoint": 600,
+      "meltingDuration": 45,
+      "smeltedRatio": 1,
+      "smeltingType": "fire",
+      "smeltedStack": {
+        "type": "block",
+        "code": "teapot-blue-fired-east"
+      },
+      "requiresContainer": false
+    },
+    "teapot-fire-raw-*": {
+      "meltingPoint": 600,
+      "meltingDuration": 45,
+      "smeltedRatio": 1,
+      "smeltingType": "fire",
+      "smeltedStack": {
+        "type": "block",
+        "code": "teapot-fire-fired-east"
+      },
+      "requiresContainer": false
+    }
+  },
+  "shapeByType": {
+    "*-north": {
+      "base": "block/clay/teapot",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/clay/teapot",
+      "rotateY": 270
+    },
+    "*-west": {
+      "base": "block/clay/teapot",
+      "rotateY": 90
+    },
+    "*-south": {
+      "base": "block/clay/teapot",
+      "rotateY": 180
+    }
+  },
+  "heldTpIdleAnimation": "holdbothhands",
+  "doNotRenderAtLod2": true,
+  "blockmaterial": "Ceramic",
+  "creativeinventory": {
+    "general": [ "teapot-*-raw-east", "teapot-*-fired-east" ],
+    "decorative": [ "teapot-*-raw-east", "teapot-*-fired-east" ]
+  },
+  "replaceable": 300,
+  "liquidSelectable": 1,
+  "resistance": 0.75,
+  "maxStackSize": 1,
+  "lightAbsorption": 0,
+  "texturesByType": {
+    "*-fired-*": {
+      "mat": { "base": "game:block/clay/hardened/{color}" }
+    },
+    "*-raw-*": {
+      "mat": { "base": "game:block/clay/{color}clay" }
+    }
+  },
+  "sounds": {
+    "walk": "game:walk/stone",
+    "place": "maketea:sounds/blocks/teapotplace",
+    "break": "maketea:sounds/blocks/teapotbreak"
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "sidesolid": {
+    "all": false
+  },
+  "collisionbox": {
+    "x1": 0.25,
+    "y1": 0,
+    "z1": 0.25,
+    "x2": 0.75,
+    "y2": 0.5,
+    "z2": 0.75
+  },
+  "selectionbox": {
+    "x1": 0.25,
+    "y1": 0,
+    "z1": 0.25,
+    "x2": 0.75,
+    "y2": 0.5,
+    "z2": 0.75
+  },
+  "guiTransform": {
+    "origin": {
+      "x": 0.5,
+      "y": 0.25,
+      "z": 0.5
+    },
+    "scale": 2
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.8,
+      "y": -0.85,
+      "z": -0.47
+    },
+    "rotation": {
+      "x": 3,
+      "y": -168,
+      "z": 88
+    },
+    "scale": 1
+  },
+  "transitionablePropsByType": {
+    "teapot-fired-*": [
+      {
+        "type": "Convert",
+        "freshHours": { "avg": 0 },
+        "transitionHours": { "avg": 1 },
+        "transitionedStack": {
+          "type": "block",
+          "code": "teapot-fired-east"
+        },
+        "transitionRatio": 1
+      }
+    ]
+  }
+}

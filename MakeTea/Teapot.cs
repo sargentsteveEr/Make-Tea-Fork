@@ -35,6 +35,8 @@ namespace MakeTea
         {
             base.OnLoaded(api);
 
+            HeldPriorityInteract = true;
+
             if (Attributes?["liquidContainerProps"]?.Exists == true)
             {
                 // Note: capacityLitresFromAttributes is defined in the base class
@@ -76,6 +78,36 @@ namespace MakeTea
 
             interactions = interactions.Concat(teapotInteractions).ToArray();
         }
+
+        public override void OnHeldInteractStart( ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
+        {
+            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+            if (!firstEvent || blockSel == null) return;
+
+            var beFirepit = byEntity.World.BlockAccessor.GetBlockEntity(blockSel.Position) as BlockEntityFirepit;
+            if (beFirepit == null) return;
+
+            var inv = beFirepit.Inventory;
+
+            // let the firepit choose the correct target slot
+            var op = new ItemStackMergeOperation(byEntity.World, EnumMouseButton.Right, (EnumModifierKey)0, EnumMergePriority.AutoMerge, slot.StackSize);
+            var best = inv.GetBestSuitedSlot(slot, op);   // WeightedSlot { slot, weight }
+            var target = (best != null && best.weight > 0) ? best.slot : null;
+            if (target == null) return;
+
+            int moved = slot.TryPutInto(byEntity.World, target, slot.StackSize);
+            if (moved <= 0) return;
+
+            slot.MarkDirty();                                         // source hand slot
+            int targetId = inv.GetSlotId(target);                     // find index in that inventory
+            if (targetId >= 0) inv.MarkSlotDirty(targetId);           // mark just that slot
+            beFirepit.MarkDirty(true);                                // ensure BE/renderer update
+
+            // consume the interaction
+            handling = EnumHandHandling.PreventDefaultAction;
+        }
+
+        
 
         public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
         {

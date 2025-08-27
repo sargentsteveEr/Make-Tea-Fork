@@ -9,7 +9,7 @@
     "sargentsteveEr",
   ],
   "description": "Make clay teapots and mugs, brew tea and drink it",
-  "version": "0.4",
+  "version": "0.4.2",
   "dependencies": {
     "game": ""
   }

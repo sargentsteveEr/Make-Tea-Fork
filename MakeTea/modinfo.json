@@ -1,7 +1,7 @@
 {
   "type": "code",
-  "modid": "maketea",
-  "name": "MakeTea",
+  "modid": "maketeaforked",
+  "name": "MakeTeaForked",
   "authors": [
     "urm"
   ],
@@ -9,7 +9,7 @@
     "sargentsteveEr"
   ],
   "description": "Make clay teapots and mugs, brew tea and drink it",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "dependencies": {
     "game": ""
   }

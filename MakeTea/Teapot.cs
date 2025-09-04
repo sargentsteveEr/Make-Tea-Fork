@@ -24,7 +24,7 @@ namespace MakeTea
         public const int ITEM_SLOT = 1;
         public const int ROOM_TEMPERATURE = 20; // all vanilla containers hard-code it
 
-        public override bool CanDrinkFrom => false;
+        public override bool CanDrinkFrom => true;
 
         private static double Now(ICoreAPI api) // returns time in real-life minutes
         {
@@ -79,35 +79,183 @@ namespace MakeTea
             interactions = interactions.Concat(teapotInteractions).ToArray();
         }
 
-        public override void OnHeldInteractStart( ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
+        public override void OnHeldInteractStart(
+            ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel,
+            bool firstEvent, ref EnumHandHandling handling)
         {
+            if (!firstEvent) return;
+
+            var world = byEntity.World;
+            var ba = world.BlockAccessor;
+
+            // 1) FIREPIT PATH
+
+            if (blockSel != null)
+            {
+                var beFirepit = ba.GetBlockEntity(blockSel.Position) as BlockEntityFirepit;
+                if (beFirepit != null)
+                {
+                    if (byEntity.Controls.ShiftKey)
+                    {
+                        var inv = beFirepit.Inventory;
+                        ItemSlot target = null;
+
+                        var op = new ItemStackMergeOperation(
+                            world,
+                            EnumMouseButton.Right,
+                            (EnumModifierKey)0,                 // avoid EnumModifierKey.None on older builds
+                            EnumMergePriority.ConfirmedMerge,
+                            slot.StackSize
+                        );
+                        var best = inv.GetBestSuitedSlot(slot, op);
+
+                        if (best != null && best.weight > 0)
+                        {
+                            int idx = inv.GetSlotId(best.slot);
+                            if (idx != 0) target = best.slot;   // skip vanilla fuel slot (index 0)
+                        }
+
+                        if (target == null)
+                        {
+                            for (int i = 0; i < inv.Count; i++)
+                            {
+                                if (i == 0) continue;            // skip fuel slot
+                                var s = inv[i];
+                                if (!s.Empty) continue;
+                                if (!s.CanHold(slot)) continue;
+                                target = s;
+                                break;
+                            }
+                        }
+
+                        // last resort: accept whatever 'best' suggested (may be fuel if nothing else fits)
+                        if (target == null && best != null && best.weight > 0)
+                        {
+                            target = best.slot;
+                        }
+
+                        if (target != null)
+                        {
+                            int moved = slot.TryPutInto(world, target, slot.StackSize);
+                            if (moved > 0)
+                            {
+                                slot.MarkDirty();
+                                int sid = inv.GetSlotId(target);
+                                if (sid >= 0) inv.MarkSlotDirty(sid);
+                                beFirepit.MarkDirty(true);
+
+                                handling = EnumHandHandling.PreventDefaultAction; // consume: no drink animation
+                                return;
+                            }
+                        }
+
+                        // don't let HoD steal it for drinking
+                        handling = EnumHandHandling.PreventDefaultAction;
+                        return;
+                    }
+
+                    // not sneaking over firepit = let base handle (pour, UI, etc.)
+                    base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+                    return;
+                }
+            }
+
+            // 2) SHIFT + PLACE ON GROUND
+            if (byEntity.Controls.ShiftKey)
+            {
+                if (blockSel != null)
+                {
+                    var player = (byEntity as EntityPlayer)?.Player;
+                    if (player != null && slot?.Itemstack != null)
+                    {
+                        BlockPos placePos = blockSel.Position;
+                        if (ba.GetBlock(placePos).Replaceable < 6000)
+                        {
+                            placePos = placePos.Copy();
+                            placePos.Add(blockSel.Face);
+                        }
+
+                        var placeSel = new BlockSelection
+                        {
+                            Position = placePos,
+                            Face = blockSel.Face,
+                            HitPosition = blockSel.HitPosition
+                        };
+
+                        string fail = null;
+                        if (TryPlaceBlock(world, player, slot.Itemstack, placeSel, ref fail))
+                        {
+                            if (player.WorldData.CurrentGameMode != EnumGameMode.Creative)
+                            {
+                                slot.TakeOut(1);
+                                slot.MarkDirty();
+                            }
+
+                            handling = EnumHandHandling.PreventDefaultAction; // consume: no drink animation
+                            return;
+                        }
+                    }
+                }
+
+                // still consume to avoid any drink animation
+                handling = EnumHandHandling.PreventDefaultAction;
+                return;
+            }
+
+
+            // 3) NO SHIFT
             base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
-            if (!firstEvent || blockSel == null) return;
-
-            var beFirepit = byEntity.World.BlockAccessor.GetBlockEntity(blockSel.Position) as BlockEntityFirepit;
-            if (beFirepit == null) return;
-
-            var inv = beFirepit.Inventory;
-
-            // let the firepit choose the correct target slot
-            var op = new ItemStackMergeOperation(byEntity.World, EnumMouseButton.Right, (EnumModifierKey)0, EnumMergePriority.AutoMerge, slot.StackSize);
-            var best = inv.GetBestSuitedSlot(slot, op);   // WeightedSlot { slot, weight }
-            var target = (best != null && best.weight > 0) ? best.slot : null;
-            if (target == null) return;
-
-            int moved = slot.TryPutInto(byEntity.World, target, slot.StackSize);
-            if (moved <= 0) return;
-
-            slot.MarkDirty();                                         // source hand slot
-            int targetId = inv.GetSlotId(target);                     // find index in that inventory
-            if (targetId >= 0) inv.MarkSlotDirty(targetId);           // mark just that slot
-            beFirepit.MarkDirty(true);                                // ensure BE/renderer update
-
-            // consume the interaction
-            handling = EnumHandHandling.PreventDefaultAction;
         }
 
-        
+
+        public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack stack, BlockSelection blockSel, ref string failureCode)
+    {
+        if (byPlayer?.Entity?.Controls?.ShiftKey != true)
+        {
+            return false;
+        }
+        return base.TryPlaceBlock(world, byPlayer, stack, blockSel, ref failureCode);
+    }
+
+
+
+        public override bool OnHeldInteractStep(
+            float secondsUsed, ItemSlot slot, EntityAgent byEntity,
+            BlockSelection blockSel, EntitySelection entitySel)
+        {
+            if (byEntity.Controls.ShiftKey) return false; // block “use” only while sneaking
+            return base.OnHeldInteractStep(secondsUsed, slot, byEntity, blockSel, entitySel);
+        }
+
+
+        protected override void tryEatStop(float secondsUsed, ItemSlot slot, EntityAgent byEntity)
+        {
+            bool handle = true;
+            handle &= slot.Itemstack != null;
+            var contentStack = GetContent(slot.Itemstack);
+            handle = handle && contentStack != null && contentStack.StackSize > 0;
+            handle = handle && (contentStack.Item?.WildCardMatch("teaportion-*") ?? false);
+            handle = handle && (contentStack.Item.Attributes["makeTeaPortionProps"].Exists);
+            handle = handle && byEntity.HasBehavior<EntityBehaviorTemporalStabilityAffected>();
+            var oldSize = contentStack?.StackSize ?? 0;
+            base.tryEatStop(secondsUsed, slot, byEntity);
+            var newContent = GetContent(slot.Itemstack);
+            var consumedSize = oldSize - (newContent?.StackSize ?? 0);
+            if (handle && consumedSize > 0)
+            {
+                ItemSlot dummySlot = GetContentInDummySlot(slot, contentStack);
+                var states = contentStack.Collectible.UpdateAndGetTransitionStates(api.World, dummySlot);
+                // TODO: The way base.tryEatStop reads spoilstate seems not to respect liquids?? Verify and bug report
+                var spoilState = states.FirstOrDefault(s => s.Props.Type == EnumTransitionType.Perish)?.TransitionLevel ?? 0f;
+                WaterTightContainableProps containableProps = GetContainableProps(contentStack); ;
+                var stabilityGain = contentStack.Item.Attributes["makeTeaPortionProps"]["stabilityGain"].AsFloat();
+                var stabilityBehavior = byEntity.GetBehavior<EntityBehaviorTemporalStabilityAffected>();
+                stabilityBehavior.OwnStability += stabilityGain * consumedSize * (1f - spoilState) / containableProps.ItemsPerLitre;
+
+            }
+        }
+
+
 
         public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
         {
@@ -250,33 +398,33 @@ namespace MakeTea
         }
 
         public TeapotRecipe FindMatchingRecipe(ItemStack stack, ItemStack[] inventory)
-		{
-			if (inventory.Length < 2 || inventory[LIQUID_SLOT] == null || inventory[ITEM_SLOT] == null) return null;
+        {
+            if (inventory.Length < 2 || inventory[LIQUID_SLOT] == null || inventory[ITEM_SLOT] == null) return null;
 
-			// NEW: normalize order so index 0 is the liquid
-			var norm = (inventory[LIQUID_SLOT].Collectible?.IsLiquid() ?? false)
-				? inventory
-				: new ItemStack[] { inventory[ITEM_SLOT], inventory[LIQUID_SLOT] };
+            // NEW: normalize order so index 0 is the liquid
+            var norm = (inventory[LIQUID_SLOT].Collectible?.IsLiquid() ?? false)
+                ? inventory
+                : new ItemStack[] { inventory[ITEM_SLOT], inventory[LIQUID_SLOT] };
 
-			float temperature = GetLiquidTemperature(stack);
+            float temperature = GetLiquidTemperature(stack);
 
-			TeapotRecipe foundRecipe = null;
-			foreach (var recipe in GetModSystem().GetTeapotRecipes())
-			{
-				if (recipe.Matches(norm, temperature, out float outsize))
-				{
-					foundRecipe = recipe;
-					break;
-				}
-			}
-			if (foundRecipe != GetCurrentRecipe(stack))
-			{
-				SetCurrentRecipe(stack, foundRecipe);
-				SetCraftingQuality(stack, 0);
-				SetCraftingTime(stack, Now(api));
-			}
-			return foundRecipe;
-		}
+            TeapotRecipe foundRecipe = null;
+            foreach (var recipe in GetModSystem().GetTeapotRecipes())
+            {
+                if (recipe.Matches(norm, temperature, out float outsize))
+                {
+                    foundRecipe = recipe;
+                    break;
+                }
+            }
+            if (foundRecipe != GetCurrentRecipe(stack))
+            {
+                SetCurrentRecipe(stack, foundRecipe);
+                SetCraftingQuality(stack, 0);
+                SetCraftingTime(stack, Now(api));
+            }
+            return foundRecipe;
+        }
 
         private InventoryBase MakeTemporaryInventory(ItemStack[] contents)
         {

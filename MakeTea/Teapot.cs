@@ -18,7 +18,7 @@ namespace MakeTea
         Brewed = 2,
     }
 
-    internal class Teapot : BlockLiquidContainerTopOpened, IInFirepitRendererSupplier
+    public class Teapot : BlockLiquidContainerTopOpened, IInFirepitRendererSupplier
     {
         public const int LIQUID_SLOT = 0;
         public const int ITEM_SLOT = 1;
@@ -399,24 +399,33 @@ namespace MakeTea
 
         public TeapotRecipe FindMatchingRecipe(ItemStack stack, ItemStack[] inventory)
         {
-            if (inventory.Length < 2 || inventory[LIQUID_SLOT] == null || inventory[ITEM_SLOT] == null) return null;
+            // Guard: must have both slots
+            if (inventory == null || inventory.Length < 2 || inventory[LIQUID_SLOT] == null || inventory[ITEM_SLOT] == null)
+                return null;
 
-            // NEW: normalize order so index 0 is the liquid
+            // Normalize (slot 0 = liquid)
             var norm = (inventory[LIQUID_SLOT].Collectible?.IsLiquid() ?? false)
                 ? inventory
                 : new ItemStack[] { inventory[ITEM_SLOT], inventory[LIQUID_SLOT] };
 
+            // Guard: mod system / recipe list might not be ready yet (early ticks)
+            var modsys = api?.ModLoader?.GetModSystem<MakeTeaModSystem>();
+            var recipes = modsys?.GetTeapotRecipes();
+            if (recipes == null) return null;
+
             float temperature = GetLiquidTemperature(stack);
 
             TeapotRecipe foundRecipe = null;
-            foreach (var recipe in GetModSystem().GetTeapotRecipes())
+            foreach (var recipe in recipes)
             {
-                if (recipe.Matches(norm, temperature, out float outsize))
+                if (recipe != null && recipe.Matches(norm, temperature, out float outsize))
                 {
                     foundRecipe = recipe;
                     break;
                 }
             }
+
+            // Only update attributes when the recipe actually changed
             if (foundRecipe != GetCurrentRecipe(stack))
             {
                 SetCurrentRecipe(stack, foundRecipe);
@@ -425,6 +434,7 @@ namespace MakeTea
             }
             return foundRecipe;
         }
+
 
         private InventoryBase MakeTemporaryInventory(ItemStack[] contents)
         {

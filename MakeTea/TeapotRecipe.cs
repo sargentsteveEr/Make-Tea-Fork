@@ -237,59 +237,77 @@ namespace MakeTea
         }
 
         public Dictionary<string, string[]> GetNameToCodeMapping(IWorldAccessor world)
+
+        // honestly at a certain point im not even sure what the hell im writing lol
+
         {
-            Dictionary<string, string[]> mappings = new Dictionary<string, string[]>();
+            var mappings = new Dictionary<string, string[]>();
 
             if (Ingredients == null || Ingredients.Length == 0) return mappings;
 
             foreach (var ingred in Ingredients)
             {
-                if (!ingred.Code.Path.Contains('*')) continue;
+                //  only build variant mappings when there's a wildcard in the PATH portion.
+                // (Domain wildcards like "*:" are handled by WildcardUtil.Match() below.)
+                var patternPath = ingred.Code?.Path;
+                if (string.IsNullOrEmpty(patternPath)) continue;
 
-                int wildcardStartLen = ingred.Code.Path.IndexOf('*');
-                int wildcardEndLen = ingred.Code.Path.Length - wildcardStartLen - 1;
+                int firstStar = patternPath.IndexOf('*');
+                if (firstStar < 0) continue; // no wildcard in PATH -> nothing to expand
 
-                List<string> codes = new List<string>();
+                int lastStar  = patternPath.LastIndexOf('*');
+                int prefixLen = Math.Max(0, firstStar);
+                int suffixLen = Math.Max(0, patternPath.Length - lastStar - 1);
+
+                var codes = new List<string>();
 
                 if (ingred.Type == EnumItemClass.Block)
                 {
                     for (int i = 0; i < world.Blocks.Count; i++)
                     {
-                        if (world.Blocks[i].Code == null || world.Blocks[i].IsMissing) continue;
+                        var b = world.Blocks[i];
+                        if (b?.Code == null || b.IsMissing) continue;
 
-                        if (WildcardUtil.Match(ingred.Code, world.Blocks[i].Code))
-                        {
-                            string code = world.Blocks[i].Code.Path.Substring(wildcardStartLen);
-                            string codepart = code.Substring(0, code.Length - wildcardEndLen);
-                            if (ingred.AllowedVariants != null && !ingred.AllowedVariants.Contains(codepart)) continue;
+                        // only consider blocks that actually match the full (domain+path) wildcard.
+                        if (!WildcardUtil.Match(ingred.Code, b.Code)) continue;
 
-                            codes.Add(codepart);
+                        var path = b.Code.Path;
+                        if (path.Length < prefixLen + suffixLen) continue; // defensive guard
 
-                        }
+                        string codepart = path.Substring(prefixLen, path.Length - prefixLen - suffixLen);
+
+                        if (ingred.AllowedVariants != null && !ingred.AllowedVariants.Contains(codepart)) continue;
+
+                        codes.Add(codepart);
                     }
                 }
                 else
                 {
                     for (int i = 0; i < world.Items.Count; i++)
                     {
-                        if (world.Items[i].Code == null || world.Items[i].IsMissing) continue;
+                        var it = world.Items[i];
+                        if (it?.Code == null || it.IsMissing) continue;
 
-                        if (WildcardUtil.Match(ingred.Code, world.Items[i].Code))
-                        {
-                            string code = world.Items[i].Code.Path.Substring(wildcardStartLen);
-                            string codepart = code.Substring(0, code.Length - wildcardEndLen);
-                            if (ingred.AllowedVariants != null && !ingred.AllowedVariants.Contains(codepart)) continue;
+                        // only consider items that actually match the full (domain+path) wildcard.
+                        if (!WildcardUtil.Match(ingred.Code, it.Code)) continue;
 
-                            codes.Add(codepart);
-                        }
+                        var path = it.Code.Path;
+                        if (path.Length < prefixLen + suffixLen) continue; // defensive guard
+
+                        string codepart = path.Substring(prefixLen, path.Length - prefixLen - suffixLen);
+
+                        if (ingred.AllowedVariants != null && !ingred.AllowedVariants.Contains(codepart)) continue;
+
+                        codes.Add(codepart);
                     }
                 }
 
-                mappings[ingred.Name ?? "wildcard" + mappings.Count] = codes.ToArray();
+                mappings[ingred.Name ?? ("wildcard" + mappings.Count)] = codes.ToArray();
             }
 
             return mappings;
         }
+
 
         public bool Resolve(IWorldAccessor world, string sourceForErrorLogging)
         {

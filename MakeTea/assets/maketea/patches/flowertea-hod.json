@@ -1,0 +1,52 @@
+[
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "value": {
+      "code": "heathertea-hod",
+      "ingredients": 
+      [
+          {
+            "type": "item",
+            "codes": [
+              "hydrateordiedrate:*"
+            ]
+          },
+
+        { "type": "block", "code": "game:flower-heather-free", "quantity": 1 }
+
+      ],
+      "output": { "type": "item", "code": "teaportion-heather", "litres": 1 },
+      "duration": 1,
+      "minTemperature": 60,
+      "maxTemperature": 80
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "value": {
+      "code": "catminttea-hod",
+      "ingredients": 
+      [
+          {
+            "type": "item",
+            "codes": [
+              "hydrateordiedrate:*"
+            ]
+          },
+
+        { "type": "block", "code": "game:flower-catmint-free", "quantity": 1 }
+
+      ],
+      "output": { "type": "item", "code": "teaportion-catmint", "litres": 1 },
+      "duration": 1,
+      "minTemperature": 40,
+      "maxTemperature": 60
+    }
+  }
+]

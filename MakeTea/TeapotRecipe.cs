@@ -13,20 +13,135 @@ using System.Linq;
 namespace MakeTea
 {
     [DocumentAsJson]
-    public class TeapotRecipeIngredient: CraftingRecipeIngredient
+    public class TeapotRecipeIngredient : CraftingRecipeIngredient
     {
-        public bool Matches(ItemStack slot, out float outsize)
+
+        [DocumentAsJson] public string[] Codes;
+
+        // runtime matching
+        // TeapotRecipe.cs
+        public bool Matches(ItemStack slot, out float normalizedQty)
+    {
+        normalizedQty = 0f;
+        if (slot == null) return false;
+
+        var coll = slot.Collectible;
+        if (coll == null) return false;
+
+        float qty = slot.StackSize;
+
+        // Treat any stack with containable props as liquid-ish (covers item portions)
+        var props = BlockLiquidContainerBase.GetContainableProps(slot);
+        if (props != null)
         {
-            outsize = slot?.StackSize ?? 0;
-            if (slot == null) return false;
-            if (slot.Collectible?.IsLiquid() ?? false) {
-                WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slot);
-                outsize /= props.ItemsPerLitre;
-            }
-            outsize /= Quantity;
-            return slot.Collectible?.WildCardMatch(Code) ?? false;
+            if (props.ItemsPerLitre <= 0) return false;
+            qty /= props.ItemsPerLitre;
         }
+        // (if props == null) it's a solid; leave qty as stack count
+
+        normalizedQty = qty / Math.Max(1, Quantity);
+
+        // Prefer OR-match when Codes[] is present (API has array overloads)
+        if ((Codes?.Length ?? 0) > 0)
+        {
+            var any = Codes.Where(s => !string.IsNullOrWhiteSpace(s))
+                           .Select(s => new AssetLocation(s))
+                           .ToArray();
+            if (any.Length == 0) return false;
+            return coll.WildCardMatch(any);   // ← array overload, match-ANY :contentReference[oaicite:1]{index=1}
+        }
+
+        if (Code == null) return false;
+        return coll.WildCardMatch(Code);
     }
+
+
+
+
+            public new bool Resolve(IWorldAccessor resolver, string sourceForErrorLogging)
+            {
+                // if using single 'code' let vanilla do it.
+                if (Codes == null || Codes.Length == 0) return base.Resolve(resolver, sourceForErrorLogging);
+
+                // expand each entry via a temporary vanilla ingredient,
+                // then keep one representative for handbook/UI.
+                ItemStack first = null;
+                bool any = false;
+
+                foreach (var wc in Codes)
+                {
+                    if (string.IsNullOrWhiteSpace(wc)) continue;
+
+                    var temp = new CraftingRecipeIngredient
+                    {
+                        Type = this.Type,
+                        Code = new AssetLocation(wc),
+                        Quantity = this.Quantity,
+                        IsTool = this.IsTool,
+                        Name = this.Name,
+                        AllowedVariants = this.AllowedVariants,
+                        Attributes = this.Attributes
+                    };
+
+                    if (temp.Resolve(resolver, sourceForErrorLogging))
+                    {
+                        any = true;
+                        if (first == null) first = temp.ResolvedItemstack;
+                    }
+                }
+
+                if (any)
+                {
+                    this.ResolvedItemstack = first;  // API exposes only singular representative
+                    return true;
+                }
+
+                resolver.Logger.Warning(
+                    "Teapot recipe ingredient could not resolve any of the codes [{0}] in {1}",
+                    string.Join(", ", Codes), sourceForErrorLogging
+                );
+                return false;
+            }
+
+        // network serialization
+            public override void ToBytes(BinaryWriter writer)
+            {
+                var backup = Code;
+                if ((Codes?.Length ?? 0) > 0 && Code == null)
+                    Code = new AssetLocation(Codes[0]);  // representative to satisfy base
+
+                base.ToBytes(writer);
+
+                writer.Write(Codes?.Length ?? 0);
+                if (Codes != null) foreach (var c in Codes) writer.Write(c);
+
+                Code = backup;
+            }
+
+            public override void FromBytes(BinaryReader reader, IWorldAccessor resolver)
+            {
+                base.FromBytes(reader, resolver);
+
+                int n = reader.ReadInt32();
+                if (n > 0)
+                {
+                    Codes = new string[n];
+                    for (int i = 0; i < n; i++) Codes[i] = reader.ReadString();
+                }
+                else Codes = null;
+
+                if ((Codes?.Length ?? 0) > 0 && Code == null)
+                    Code = new AssetLocation(Codes[0]);  // belt & suspenders for client
+            }
+
+
+        // If SDK instead requires IClassRegistryAPI, use this overload instead:
+        // public override void FromBytes(BinaryReader reader, IClassRegistryAPI instancer) { ... same body ... }
+            
+        // lil note lol
+        }
+
+
 
     [DocumentAsJson]
     public class TeapotOutputStack : JsonItemStack
@@ -45,6 +160,8 @@ namespace MakeTea
             base.ToBytes(writer);
             writer.Write(Litres);
         }
+
+        
 
         public new TeapotOutputStack Clone()
         {
@@ -139,6 +256,8 @@ namespace MakeTea
             writer.Write(MaxTemperature);
         }
 
+        
+
         public void FromBytes(BinaryReader reader, IWorldAccessor resolver)
         {
             Code = reader.ReadString();
@@ -157,41 +276,43 @@ namespace MakeTea
             MinTemperature = reader.ReadDouble();
             MaxTemperature = reader.ReadDouble();
         }
+        
+        
 
         public bool Matches(ItemStack[] stacks, float temperature, out float outsize)
-		{
-			outsize = 0;
-			if (temperature <= Teapot.ROOM_TEMPERATURE) return false;
-			if (Ingredients == null || Ingredients.Length == 0) return false;
-			if (stacks == null || stacks.Length < Ingredients.Length) return false;
+        {
+            outsize = 0;
+            if (temperature <= Teapot.ROOM_TEMPERATURE) return false;
+            if (Ingredients == null || Ingredients.Length == 0) return false;
+            if (stacks == null || stacks.Length < Ingredients.Length) return false;
 
-			bool TryOrder(int a, int b, out float size)
-			{
-				size = 0f;
-				if (!Ingredients[0].Matches(stacks[a], out float s0)) return false;
-				if (!Ingredients[1].Matches(stacks[b], out float s1)) return false;
-				if (Math.Abs(s0 - s1) > 1e-4f) return false;
-				size = s0;
-				return true;
-			}
+            bool TryOrder(int a, int b, out float size)
+            {
+                size = 0f;
+                if (!Ingredients[0].Matches(stacks[a], out float s0)) return false;
+                if (!Ingredients[1].Matches(stacks[b], out float s1)) return false;
+                if (Math.Abs(s0 - s1) > 1e-4f) return false;
+                size = s0;
+                return true;
+            }
 
-			if (Ingredients.Length == 2)
-			{
-				if (TryOrder(0, 1, out outsize)) return true;
-				if (TryOrder(1, 0, out outsize)) return true;
-				return false;
-			}
+            if (Ingredients.Length == 2)
+            {
+                if (TryOrder(0, 1, out outsize)) return true;
+                if (TryOrder(1, 0, out outsize)) return true;
+                return false;
+            }
 
-			// fallback: original strict order for 3+ ingredients
-			float total;
-			if (!Ingredients[0].Matches(stacks[0], out total)) return false;
-			for (int i = 1; i < Ingredients.Length; i++)
-			{
-				if (!Ingredients[i].Matches(stacks[i], out float slotSize) || Math.Abs(slotSize - total) > 1e-4f) return false;
-			}
-			outsize = total;
-			return true;
-		}
+            // fallback: original strict order for 3+ ingredients
+            float total;
+            if (!Ingredients[0].Matches(stacks[0], out total)) return false;
+            for (int i = 1; i < Ingredients.Length; i++)
+            {
+                if (!Ingredients[i].Matches(stacks[i], out float slotSize) || Math.Abs(slotSize - total) > 1e-4f) return false;
+            }
+            outsize = total;
+            return true;
+        }
 
         public double TemperatureMatch(double temperature)
         {
@@ -210,7 +331,9 @@ namespace MakeTea
             return NatFloat.Zero;
         }
 
-        public bool TryCraft(InventoryBase slots, float temperature, double craftingTime, double quality) {
+        
+        public bool TryCraft(InventoryBase slots, float temperature, double craftingTime, double quality)
+        {
             float outsize = 0;
             ItemStack[] stacks = slots.Select(s => s.Itemstack).ToArray();
             if (craftingTime < Duration || !Matches(stacks, temperature, out outsize) || outsize == 0) return false;
@@ -218,12 +341,12 @@ namespace MakeTea
             {
                 var quantity = Ingredients[i].Quantity;
                 var stack = slots[i].Itemstack;
-                if (stack.Collectible.IsLiquid())
+                var props = BlockLiquidContainerBase.GetContainableProps(stack);
+                if (props != null && props.ItemsPerLitre > 0)
                 {
-                    WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
                     quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
                 }
-                stack.StackSize -= (int)MathF.Round((float)quantity * outsize);
+                stack.StackSize -= (int)MathF.Round(quantity * outsize);
                 if (stack.StackSize == 0)
                     slots[i].Itemstack = null;
                 slots[i].MarkDirty();

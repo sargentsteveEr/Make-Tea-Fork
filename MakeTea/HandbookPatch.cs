@@ -6,6 +6,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.GameContent;
+using System;
 
 namespace MakeTea;
 
@@ -13,9 +14,10 @@ namespace MakeTea;
 [HarmonyPatch(typeof(CollectibleBehaviorHandbookTextAndExtraInfo), nameof(CollectibleBehaviorHandbookTextAndExtraInfo.GetHandbookInfo))]
 public static class HandbookPatch
 {
+    
     private const float MedumPadding = 14f;
     private const float MarginBottom = 3f;
-    private  static void AddHeading(List<RichTextComponentBase> components, ICoreClientAPI capi, string heading)
+    private static void AddHeading(List<RichTextComponentBase> components, ICoreClientAPI capi, string heading)
     {
         components.Add(new ClearFloatTextComponent(capi, MedumPadding));
         var headc = new RichTextComponent(capi, Lang.Get(heading) + "\n", CairoFont.WhiteSmallText().WithWeight(FontWeight.Bold));
@@ -23,8 +25,6 @@ public static class HandbookPatch
     }
     public static void AddTeaRecipes(List<RichTextComponentBase> components, ItemSlot inSlot, ICoreClientAPI capi, ItemStack[] allStacks, ActionConsumable<string> openDetailPageFor)
     {
-        if (!ItemSlotTeapotInput.CanHold(inSlot.Itemstack.Collectible.Code) && inSlot.Itemstack.Collectible.WildCardMatch("maketea:tea-*")) return;
-
         var system = capi.ModLoader.GetModSystem<MakeTeaModSystem>();
         var recipes = system.GetTeapotRecipes();
 
@@ -38,20 +38,34 @@ public static class HandbookPatch
         {
             foreach (var ingred in recipe.Ingredients)
             {
-                if (ingred.SatisfiesAsIngredient(maxstack) && !ingredientStacks.Any(s => s.Equals(capi.World, recipe.Output.ResolvedItemstack, GlobalConstants.IgnoredStackAttributes)))
+                if (ingred.Matches(maxstack, out _) && !ingredientStacks.Any(s => s.Equals(capi.World, recipe.Output.ResolvedItemstack, GlobalConstants.IgnoredStackAttributes)))
                 {
                     ingredientStacks.Add(recipe.Output.ResolvedItemstack);
                 }
             }
-            if (recipe.Output.ResolvedItemstack.Collectible.Equals(inSlot.Itemstack.Collectible))
+
+            if (recipe.Output?.ResolvedItemstack?.Collectible?.Code.Equals(inSlot.Itemstack?.Collectible?.Code) == true)
             {
-                var herbIngredient = recipe.Ingredients.FirstOrDefault(s => ItemSlotTeapotInput.CanHold(s.Code));
-                if (herbIngredient != null) {
+                var herbIngredient = recipe.Ingredients.FirstOrDefault(s =>
+                {
+                    var anyCode = s.Code ?? (s.Codes != null && s.Codes.Length > 0 ? new AssetLocation(s.Codes[0]) : null);
+                    return anyCode != null && ItemSlotTeapotInput.CanHold(anyCode);
+                });
+
+                if (herbIngredient != null)
+                {
                     foreach (var stack in allStacks)
                     {
-                        var maxCandidateStack = stack.GetEmptyClone();
-                        maxCandidateStack.StackSize = maxCandidateStack.Collectible.MaxStackSize * 10;
-                        if (herbIngredient.SatisfiesAsIngredient(maxCandidateStack))
+                        if (stack?.Collectible == null) continue;
+                        var maxCandidateStack = stack.Clone();
+                        var m = System.Math.Max(1, maxCandidateStack.Collectible.MaxStackSize);
+                        maxCandidateStack.StackSize = m * 10;
+
+                        if (herbIngredient.Matches(maxCandidateStack, out _))
+
+                        if (ItemSlotTeapotInput.CanHold(maxCandidateStack.Collectible.Code)
+                            && herbIngredient.Matches(maxCandidateStack, out _))
+
                         {
                             var tempStack = stack.Clone();
                             tempStack.Attributes.SetDouble("__maketea_min_temperature", recipe.MinTemperature);
@@ -60,6 +74,7 @@ public static class HandbookPatch
                         }
                     }
                 }
+
             }
         }
 
@@ -81,6 +96,21 @@ public static class HandbookPatch
             components.Add(new ClearFloatTextComponent(capi, MarginBottom));
         }
 
+        if (inSlot?.Itemstack?.Collectible != null &&
+            inSlot.Itemstack.Collectible.WildCardMatch("maketea:teaportion-*"))
+        {
+            var currentTea = recipes.FirstOrDefault(r =>
+                r.Output?.ResolvedItemstack?.Collectible?.Code.Equals(inSlot.Itemstack.Collectible.Code) == true);
+
+            if (currentTea != null)
+            {
+                var s = inSlot.Itemstack.Clone();
+                s.Attributes.SetDouble("__maketea_min_temperature", currentTea.MinTemperature);
+                s.Attributes.SetDouble("__maketea_max_temperature", currentTea.MaxTemperature);
+                teaStacks.Add(s);
+            }
+        }
+
         if (teaStacks.Count > 0)
         {
             AddHeading(components, capi, "maketea:handbook-tea-heading");
@@ -98,9 +128,15 @@ public static class HandbookPatch
                 var maxTemperature = dstack.Attributes.TryGetDouble("__maketea_max_temperature");
                 if (minTemperature != null && maxTemperature != null)
                 {
-                    var temperatureHint = new RichTextComponent(capi, Lang.Get("maketea:handbook-temperature-hint", minTemperature, maxTemperature), CairoFont.WhiteSmallText().WithWeight(FontWeight.Bold));
+                    var temperatureHint = new RichTextComponent(
+                        capi,
+                        Lang.Get("maketea:handbook-temperature-hint", minTemperature, maxTemperature) + "\n",
+                        CairoFont.WhiteSmallText().WithWeight(FontWeight.Bold)
+                    );
                     components.Add(temperatureHint);
+                    components.Add(new ClearFloatTextComponent(capi, MarginBottom)); // optional but helps spacing
                 }
+
             }
 
             components.Add(new ClearFloatTextComponent(capi, MarginBottom));
@@ -108,10 +144,14 @@ public static class HandbookPatch
     }
 
     [HarmonyPostfix]
-    public static void Postfix(ref RichTextComponentBase[] __result, ItemSlot inSlot, ICoreClientAPI capi, ItemStack[] allStacks, ActionConsumable<string> openDetailPageFor)
+    [HarmonyPriority(Priority.Last)] 
+        public static void Postfix(ref RichTextComponentBase[] __result, ItemSlot inSlot, ICoreClientAPI capi, ItemStack[] allStacks, ActionConsumable<string> openDetailPageFor)
     {
-        List<RichTextComponentBase> components = __result.ToList();
+        var components = (__result ?? Array.Empty<RichTextComponentBase>()).ToList();  // safe if null
         AddTeaRecipes(components, inSlot, capi, allStacks, openDetailPageFor);
         __result = components.ToArray();
     }
+
+
+
 }

@@ -1,32 +1,46 @@
 ﻿using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
-using Vintagestory.API.Datastructures;
 using HarmonyLib;
 
 namespace MakeTea
 {
-    public class TeapotRecipeRegistry: RecipeRegistryGeneric<TeapotRecipe>
+    public class TeapotRecipeRegistry : RecipeRegistryGeneric<TeapotRecipe>
     {
         private readonly Dictionary<string, TeapotRecipe> lookupMap = new();
+
         public void Add(TeapotRecipe teapotRecipe)
         {
+            // Avoid duplicates if AssetsLoaded runs more than once across reloads
+            if (teapotRecipe == null || string.IsNullOrEmpty(teapotRecipe.Code)) return;
             if (lookupMap.ContainsKey(teapotRecipe.Code)) return;
-            lookupMap.TryAdd(teapotRecipe.Code, teapotRecipe);
+
+            lookupMap[teapotRecipe.Code] = teapotRecipe;
             Recipes.Add(teapotRecipe);
         }
 
         public TeapotRecipe GetById(string code)
         {
-            return lookupMap.TryGetValue(code);
+            if (code == null) return null;
+            return lookupMap.TryGetValue(code, out var recipe) ? recipe : null;
         }
 
         public override void FromBytes(IWorldAccessor resolver, int quantity, byte[] data)
         {
             base.FromBytes(resolver, quantity, data);
+
+            // Rebuild fast lookup after sync from server -> client
             lookupMap.Clear();
             foreach (var recipe in Recipes)
-                lookupMap.TryAdd(recipe.Code, recipe);
+            {
+                if (recipe?.Code != null) lookupMap.TryAdd(recipe.Code, recipe);
+            }
+        }
+
+        public void Clear()
+        {
+            Recipes.Clear();
+            lookupMap.Clear();
         }
     }
 
@@ -35,10 +49,8 @@ namespace MakeTea
         private TeapotRecipeRegistry teapotRecipes;
         public Harmony harmony;
 
-        public List<TeapotRecipe> GetTeapotRecipes()
-        {
-            return teapotRecipes.Recipes;
-        }
+        public List<TeapotRecipe> GetTeapotRecipes() => teapotRecipes?.Recipes;
+
         public override void Start(ICoreAPI api)
         {
             api.RegisterBlockClass("MakeTea_Teapot", typeof(Teapot));
@@ -48,24 +60,27 @@ namespace MakeTea
             if (!Harmony.HasAnyPatches(Mod.Info.ModID))
             {
                 harmony = new Harmony(Mod.Info.ModID);
-                harmony.PatchAll(); // Applies all harmony patches
+                harmony.PatchAll();
+            }
+        }
+        public override void AssetsFinalize(ICoreAPI api)
+        {
+            base.AssetsLoaded(api);
+
+            if (api is ICoreServerAPI sapi)
+            {
+                LoadRecipes(sapi);
             }
         }
 
-        public override void StartServerSide(ICoreServerAPI api)
-        {
-            LoadRecipes(api);
-        }
-
-        public TeapotRecipe GetTeapotRecipeById(string id)
-        {
-            return teapotRecipes.GetById(id);
-        }
+        public TeapotRecipe GetTeapotRecipeById(string id) => teapotRecipes?.GetById(id);
 
         private void LoadRecipes(ICoreServerAPI api)
         {
-            // TODO: figure out why recipes arrive here twice
-            new TeapotRecipeLoader().LoadRecipes<TeapotRecipe>(api, "teapot recipe", "recipes/teapot", teapotRecipes.Add);
+            teapotRecipes.Clear();
+
+            new TeapotRecipeLoader()
+                .LoadRecipes<TeapotRecipe>(api, "teapot recipe", "recipes/teapot", teapotRecipes.Add);
         }
 
         public override void Dispose()

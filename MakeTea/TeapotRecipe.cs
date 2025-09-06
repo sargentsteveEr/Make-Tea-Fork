@@ -336,20 +336,27 @@ namespace MakeTea
         {
             float outsize = 0;
             ItemStack[] stacks = slots.Select(s => s.Itemstack).ToArray();
-            if (craftingTime < Duration || !Matches(stacks, temperature, out outsize) || outsize == 0) return false;
+            if (craftingTime < Duration || !Matches(stacks, temperature, out outsize) || outsize == 0)
+                return false;
             for (var i = 0; i < slots.Count; i++)
             {
                 var quantity = Ingredients[i].Quantity;
                 var stack = slots[i].Itemstack;
-                var props = BlockLiquidContainerBase.GetContainableProps(stack);
-                if (props != null && props.ItemsPerLitre > 0)
+                if (stack == null) continue;
+
+                if (stack.Collectible.IsLiquid())
                 {
+                    WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
                     quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
                 }
-                stack.StackSize -= (int)MathF.Round(quantity * outsize);
-                if (stack.StackSize == 0)
+
+                int consume = (int)MathF.Round((float)quantity * outsize);
+                stack.StackSize -= consume;
+
+                if (stack.StackSize <= 0)
+                {
                     slots[i].Itemstack = null;
-                slots[i].MarkDirty();
+                }
             }
             var outputStack = Output.ResolvedItemstack.Clone();
             outputStack.StackSize = (int)(Output.Litres * BlockLiquidContainerBase.GetContainableProps(outputStack).ItemsPerLitre * outsize);

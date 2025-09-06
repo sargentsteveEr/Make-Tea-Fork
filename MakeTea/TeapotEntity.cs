@@ -83,6 +83,11 @@ namespace MakeTea
 
         private GuiDialogTeapot invDialog;
 
+        private double brewStartedHours = 0;
+        private double lastUpdateHours  = 0;
+        
+        private const float PassiveCoolPerSecond = 0.5f;
+        private bool IsBrewing => brewStartedHours > 0;
         public TeapotEntity() : base()
         {
             inventory = new InventoryGeneric(2, null, null, (id, self) =>
@@ -212,28 +217,47 @@ namespace MakeTea
         {
             base.Initialize(api);
             (inventory[Teapot.ITEM_SLOT] as ItemSlotTeapotInput).Initialize(api.World);
-            CoolNow(0f); // Set item's temperature equal to the liquid's
+            CoolNow(0f);
             ownBlock = Block as Teapot;
+
             Props = new LiquidTopOpenContainerProps();
             if (ownBlock?.Attributes?["liquidContainerProps"].Exists == true)
                 Props = ownBlock.Attributes["liquidContainerProps"].AsObject<LiquidTopOpenContainerProps>(null, ownBlock.Code.Domain);
 
             Update();
 
+            RegisterDelayedCallback(_ => RehookHeatSource(), 50);
             RegisterGameTickListener(RegularUpdate, 200);
         }
         private void RegularUpdate(float dt)
         {
             Update();
+
+            // If we’re above ambient and not obviously on a very hot source,
+            // bleed a bit toward ROOM_TEMPERATURE so UI doesn’t get “stuck”.
+            var liq = inventory[Teapot.LIQUID_SLOT]?.Itemstack;
+            if (liq?.Collectible != null)
+            {
+                var t = liq.Collectible.GetTemperature(Api.World, liq);
+                if (t > Teapot.ROOM_TEMPERATURE + 0.1f)
+                {
+                    // Small, smooth step; this also keeps ItemStack in sync via CoolNow()
+                    CoolNow(PassiveCoolPerSecond * dt);
+                }
+            }
         }
 
         public override void ToTreeAttributes(ITreeAttribute tree)
         {
             base.ToTreeAttributes(tree);
+
             if (ItemStack != null)
             {
                 tree["blockTree"] = ItemStack.Attributes;
             }
+
+            tree.SetDouble("brewStartedHours", brewStartedHours);
+            tree.SetDouble("lastUpdateHours",  lastUpdateHours);
         }
 
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
@@ -242,11 +266,11 @@ namespace MakeTea
             var attributes = tree["blockTree"] as ITreeAttribute;
             if (attributes != null)
             {
-                ItemStack = new ItemStack(Block)
-                {
-                    Attributes = attributes
-                };
+                ItemStack = new ItemStack(Block) { Attributes = attributes };
             }
+            brewStartedHours = tree.GetDouble("brewStartedHours", 0);
+            lastUpdateHours  = tree.GetDouble("lastUpdateHours",  0);
+            RegisterDelayedCallback(_ => RehookHeatSource(), 50);
         }
 
 
@@ -331,16 +355,33 @@ namespace MakeTea
             var liquid = inventory[Teapot.LIQUID_SLOT]?.Itemstack;
             var temperature = liquid?.Collectible?.GetTemperature(Api.World, liquid) ?? 0;
             var newTemperature = Math.Max(Teapot.ROOM_TEMPERATURE, temperature - amountRel);
+
             foreach (var slot in inventory)
             {
                 var stack = slot.Itemstack;
                 if (stack?.Collectible != null)
                 {
-                    if (stack.Collectible.GetTemperature(Api.World, stack) == newTemperature) continue; // Prevent stack overflow in slot changed handler
+                    if (stack.Collectible.GetTemperature(Api.World, stack) == newTemperature) continue;
                     stack.Collectible.SetTemperature(Api.World, stack, newTemperature);
                     slot.MarkDirty();
                 }
             }
+            if (ItemStack?.Collectible != null)
+            {
+                ItemStack.Collectible.SetTemperature(Api.World, ItemStack, newTemperature);
+            }
+        }
+        
+        private void RehookHeatSource()
+        {
+            var posBelow = Pos.DownCopy();
+            var beFirepit = Api?.World?.BlockAccessor?.GetBlockEntity(posBelow) as BlockEntityFirepit;
+            if (beFirepit != null)
+            {
+                beFirepit.Inventory?[beFirepit.Inventory.Count - 1]?.MarkDirty();
+                beFirepit.MarkDirty(true);
+            }
+            MarkDirty(true);
         }
     }
 }

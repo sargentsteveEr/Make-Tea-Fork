@@ -394,8 +394,15 @@ namespace MakeTea
 
         private float GetLiquidTemperature(ItemStack container)
         {
-            return GetTemperature(api.World, container);
+            var stacks = GetStacks(api.World, container);
+            ItemStack liq = (stacks != null && stacks.Length > LIQUID_SLOT) ? stacks[LIQUID_SLOT] : null;
+
+            float? t = liq?.Collectible?.GetTemperature(api.World, liq);
+            if (t.HasValue) return t.Value;
+
+            return base.GetTemperature(api.World, container);
         }
+
 
         public TeapotRecipe FindMatchingRecipe(ItemStack stack, ItemStack[] inventory)
         {
@@ -425,12 +432,16 @@ namespace MakeTea
                 }
             }
 
-            // Only update attributes when the recipe actually changed
-            if (foundRecipe != GetCurrentRecipe(stack))
+            // Only update attributes when the recipe's CODE actually changed
+            var currentCode = stack.Attributes.GetString(CURRENT_RECIPE_ATTRIBUTE);
+            var foundCode   = foundRecipe?.Code;
+
+            if (foundCode != currentCode)
             {
                 SetCurrentRecipe(stack, foundRecipe);
                 SetCraftingQuality(stack, 0);
                 SetCraftingTime(stack, Now(api));
+                LastUpdate = null; // helps avoid timing jitter after a recipe switch
             }
             return foundRecipe;
         }

@@ -86,7 +86,7 @@ namespace MakeTea
         private double brewStartedHours = 0;
         private double lastUpdateHours  = 0;
         
-        private const float PassiveCoolPerSecond = 0.5f;
+        private const float PassiveCoolPerSecond = 0.1f;
         private bool IsBrewing => brewStartedHours > 0;
         public TeapotEntity() : base()
         {

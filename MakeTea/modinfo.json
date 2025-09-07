@@ -3,13 +3,13 @@
   "modid": "maketeaforked",
   "name": "MakeTeaForked",
   "authors": [
-    "urm"
+    "urm", "sargentsteveEr"
   ],
   "contributors": [
-    "sargentsteveEr"
+    "Chronolegionnaire"
   ],
   "description": "Make clay teapots and mugs, brew tea and drink it",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "dependencies": {
     "game": ""
   }

@@ -282,7 +282,6 @@ namespace MakeTea
         public bool Matches(ItemStack[] stacks, float temperature, out float outsize)
         {
             outsize = 0;
-            if (temperature <= Teapot.ROOM_TEMPERATURE) return false;
             if (Ingredients == null || Ingredients.Length == 0) return false;
             if (stacks == null || stacks.Length < Ingredients.Length) return false;
 
@@ -336,28 +335,36 @@ namespace MakeTea
         {
             float outsize = 0;
             ItemStack[] stacks = slots.Select(s => s.Itemstack).ToArray();
-            if (craftingTime < Duration || !Matches(stacks, temperature, out outsize) || outsize == 0)
+
+            if (!Matches(stacks, temperature, out outsize) || outsize == 0)
                 return false;
+
+            if (temperature <= Teapot.ROOM_TEMPERATURE)
+                return false;
+
+            if (craftingTime < Duration)
+                return false;
+
             for (var i = 0; i < slots.Count; i++)
-            {
-                var quantity = Ingredients[i].Quantity;
-                var stack = slots[i].Itemstack;
-                if (stack == null) continue;
-
-                if (stack.Collectible.IsLiquid())
                 {
-                    WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
-                    quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
-                }
+                    var quantity = Ingredients[i].Quantity;
+                    var stack = slots[i].Itemstack;
+                    if (stack == null) continue;
 
-                int consume = (int)MathF.Round((float)quantity * outsize);
-                stack.StackSize -= consume;
+                    if (stack.Collectible.IsLiquid())
+                    {
+                        WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
+                        quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
+                    }
 
-                if (stack.StackSize <= 0)
-                {
-                    slots[i].Itemstack = null;
+                    int consume = (int)MathF.Round((float)quantity * outsize);
+                    stack.StackSize -= consume;
+
+                    if (stack.StackSize <= 0)
+                    {
+                        slots[i].Itemstack = null;
+                    }
                 }
-            }
             var outputStack = Output.ResolvedItemstack.Clone();
             outputStack.StackSize = (int)(Output.Litres * BlockLiquidContainerBase.GetContainableProps(outputStack).ItemsPerLitre * outsize);
             double transition = (1.0 - Math.Clamp(quality / Duration, MIN_QUALITY, 1.0)) * GetTransitionDuration().avg;

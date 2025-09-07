@@ -11,7 +11,8 @@
           {
             "type": "item",
             "codes": [
-              "hydrateordiedrate:*waterportion-*"
+              "hydrateordiedrate:*waterportion-*",
+              "hydrateordiedrate:*waterportion*"
             ]
           },
 

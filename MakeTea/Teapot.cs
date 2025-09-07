@@ -440,8 +440,9 @@ namespace MakeTea
             {
                 SetCurrentRecipe(stack, foundRecipe);
                 SetCraftingQuality(stack, 0);
-                SetCraftingTime(stack, Now(api));
-                LastUpdate = null; // helps avoid timing jitter after a recipe switch
+                // treat "craftingTime" as accumulated hot-hours of progress
+                SetCraftingTime(stack, 0);
+                LastUpdate = Now(api); // prevent a large dt on the first update after switching
             }
             return foundRecipe;
         }
@@ -500,16 +501,25 @@ namespace MakeTea
             var contents = GetStacks(world, potStack);
             var currentRecipe = FindMatchingRecipe(potStack, contents);
             if (currentRecipe == null) return MakeTransitionState(0, 1, BrewConvertState.Inactive);
-            var now = Now(api); ;
-            var craftingTime = GetCraftingTime(potStack, now);
-            var craftingQuality = GetCraftingQuality(potStack);
-            // handle negative crafting duration, as client-side time can drift very far from server time
-            double craftingDuration = Math.Max(0d, Math.Min(currentRecipe.Duration, now - craftingTime));
-            double dt = Math.Min(now - (LastUpdate ?? now), currentRecipe.Duration - craftingDuration);
+
+            var now = Now(api);
+            double progressHotHours = GetCraftingTime(potStack, 0); // accumulated while > RT
+            double dt = Math.Max(0d, now - (LastUpdate ?? now));
             LastUpdate = now;
+
             var temperature = GetLiquidTemperature(potStack);
+            if (temperature > ROOM_TEMPERATURE)
+            {
+                progressHotHours = Math.Min(currentRecipe.Duration, progressHotHours + dt);
+            }
+            else
+            {
+                progressHotHours = 0;
+            }
+
             inventory ??= MakeTemporaryInventory(contents);
-            bool crafted = currentRecipe.TryCraft(inventory, temperature, craftingDuration, craftingQuality);
+            bool crafted = currentRecipe.TryCraft(inventory, temperature, progressHotHours, GetCraftingQuality(potStack));
+
             if (write)
             {
                 if (crafted)
@@ -518,16 +528,19 @@ namespace MakeTea
                     for (int i = 0; i < inventory.Count; i++)
                         contents[i] = inventory[i].Itemstack ?? new ItemStack();
                     SetContents(potStack, contents);
+                    // no need to carry progress anymore
+                    SetCraftingTime(potStack, 0);
                 }
                 else
                 {
-                    ItemStack liquidStack = contents[LIQUID_SLOT];
-                    if (liquidStack == null) return null;
+                    // persist the updated hot progress and keep improving quality by temperature match
+                    SetCraftingTime(potStack, progressHotHours);
                     double match = currentRecipe.TemperatureMatch(temperature);
-                    SetCraftingQuality(potStack, craftingQuality + match * dt);
+                    SetCraftingQuality(potStack, GetCraftingQuality(potStack) + match * dt);
                 }
             }
-            return MakeTransitionState(craftingDuration, currentRecipe.Duration, crafted ? BrewConvertState.Brewed : BrewConvertState.Brewing);
+            return MakeTransitionState(progressHotHours, currentRecipe.Duration, crafted ? BrewConvertState.Brewed : BrewConvertState.Brewing);
+
         }
 
         public override void SetTemperature(IWorldAccessor world, ItemStack itemstack, float temperature, bool delayCooldown = true)

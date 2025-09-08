@@ -216,6 +216,13 @@ namespace MakeTea
         public override void Initialize(ICoreAPI api)
         {
             base.Initialize(api);
+
+            inventory.LateInitialize(InventoryClassName + "-" + Pos, api);
+            inventory.Pos = Pos;
+            inventory.ResolveBlocksOrItems();
+
+
+
             (inventory[Teapot.ITEM_SLOT] as ItemSlotTeapotInput).Initialize(api.World);
             CoolNow(0f);
             ownBlock = Block as Teapot;
@@ -270,7 +277,6 @@ namespace MakeTea
             }
             brewStartedHours = tree.GetDouble("brewStartedHours", 0);
             lastUpdateHours  = tree.GetDouble("lastUpdateHours",  0);
-            RegisterDelayedCallback(_ => RehookHeatSource(), 50);
         }
 
 

@@ -50,6 +50,9 @@ namespace MakeTea
         public Harmony harmony;
 
         public List<TeapotRecipe> GetTeapotRecipes() => teapotRecipes?.Recipes;
+        public override double ExecuteOrder() => 0.6;
+
+
 
         public override void Start(ICoreAPI api)
         {
@@ -63,7 +66,7 @@ namespace MakeTea
                 harmony.PatchAll();
             }
         }
-        public override void AssetsFinalize(ICoreAPI api)
+        public override void AssetsLoaded(ICoreAPI api)
         {
             base.AssetsLoaded(api);
 

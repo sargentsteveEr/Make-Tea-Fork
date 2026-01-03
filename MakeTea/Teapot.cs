@@ -31,6 +31,10 @@ namespace MakeTea
             return api.World.Calendar.ElapsedSeconds / 60d / api.World.Calendar.SpeedOfTime / api.World.Calendar.CalendarSpeedMul;
         }
 
+        
+        
+        
+
         public override void OnLoaded(ICoreAPI api)
         {
             base.OnLoaded(api);
@@ -687,10 +691,17 @@ namespace MakeTea
 
         public override int GetMergableQuantity(ItemStack sinkStack, ItemStack sourceStack, EnumMergePriority priority)
         {
-            if (priority == EnumMergePriority.DirectMerge && (sinkStack?.Block is ILiquidSink || sourceStack?.Block is ILiquidSink))
-                return Math.Clamp(MaxStackSize - sinkStack.StackSize, 1, sourceStack.StackSize);
+
+            if (priority == EnumMergePriority.AutoMerge || priority == EnumMergePriority.DirectMerge)
+            {
+                return 0;
+            }
+
             return base.GetMergableQuantity(sinkStack, sourceStack, priority);
         }
+
+
+        
 
         public override void TryMergeStacks(ItemStackMergeOperation op)
         {

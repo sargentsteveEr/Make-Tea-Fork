@@ -208,8 +208,7 @@
     }
   },
   "sounds": {
-    "walk": "game:walk/stone",
-
+    "walk": "game:walk/stone"
   },
   "sideopaque": {
     "all": false

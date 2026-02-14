@@ -199,8 +199,17 @@ namespace MakeTea
                     capi.Network.SendBlockEntityPacket(Pos, (int)EnumBlockEntityPacketId.Close, null);
                     capi.Network.SendPacketClient(Inventory.Close(byPlayer));
                 };
-                invDialog.OpenSound = AssetLocation.Create("maketea:sounds/blocks/teapotopen", Block.Code.Domain);
-                invDialog.CloseSound = AssetLocation.Create("maketea:sounds/blocks/teapotclose", Block.Code.Domain);
+                invDialog.OpenSound = new SoundAttributes()
+                {
+                    Location = AssetLocation.Create("maketea:sounds/blocks/teapotopen", Block.Code.Domain),
+                    Type = EnumSoundType.Sound
+                };
+
+                invDialog.CloseSound = new SoundAttributes()
+                {
+                    Location = AssetLocation.Create("maketea:sounds/blocks/teapotclose", Block.Code.Domain),
+                    Type = EnumSoundType.Sound
+                };
 
                 invDialog.TryOpen();
                 capi.Network.SendPacketClient(Inventory.Open(byPlayer));

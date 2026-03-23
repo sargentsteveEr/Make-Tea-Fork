@@ -34,11 +34,17 @@ namespace MakeTea
         {
             TeapotRef?.Dispose();
 
-            BoilingSound?.Stop();
-            BoilingSound?.Dispose();
+            if (BoilingSound != null)
+            {
+                BoilingSound.Stop();
+                BoilingSound.Dispose();
+            }
 
-            WhistleSound?.Stop();
-            WhistleSound?.Dispose();
+            if (WhistleSound != null)
+            {
+                WhistleSound.Stop();
+                WhistleSound.Dispose();
+            }
         }
 
         public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
@@ -97,16 +103,19 @@ namespace MakeTea
                         Volume = volume,
                         RelativePosition = false,
                     });
+                    
+                    // Start exactly once when initialized
                     sound.Start();
                 }
                 else
                 {
+                    // Only update volume if it's already playing
                     sound.SetVolume(volume);
                 }
-
             }
             else
             {
+                // Fully dispose of the sound when volume is 0 to prevent looping engine bugs
                 if (sound != null)
                 {
                     sound.Stop();

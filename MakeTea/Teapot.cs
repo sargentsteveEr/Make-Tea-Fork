@@ -831,8 +831,14 @@ namespace MakeTea
             // otherwise cooking sound keeps restarting all the time
             if (ignoreAttributeSubTrees == GlobalConstants.IgnoredStackAttributes)
                 ignoreAttributeSubTrees = GlobalConstants.IgnoredStackAttributes
-                    .Concat(new string[] { CRAFTING_TIME_ATTRIBUTE, CRAFTING_QUALITY_ATTRIBUTE, CURRENT_RECIPE_ATTRIBUTE })
+                    .Concat(new string[] { 
+                        CRAFTING_TIME_ATTRIBUTE, 
+                        CRAFTING_QUALITY_ATTRIBUTE, 
+                        CURRENT_RECIPE_ATTRIBUTE, 
+                        "lastUpdateTime"
+                    })
                     .ToArray();
+                    
             return base.Equals(thisStack, otherStack, ignoreAttributeSubTrees);
         }
     } // end class Teapot

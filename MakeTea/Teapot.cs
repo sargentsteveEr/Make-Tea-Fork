@@ -28,12 +28,12 @@ namespace MakeTea
 
         private static double Now(ICoreAPI api) // returns time in real-life minutes
         {
-            return api.World.Calendar.ElapsedSeconds / 60d / api.World.Calendar.SpeedOfTime / api.World.Calendar.CalendarSpeedMul;
+            return api.World.Calendar.TotalHours;
         }
 
-        
-        
-        
+
+
+
 
         public override void OnLoaded(ICoreAPI api)
         {
@@ -213,13 +213,13 @@ namespace MakeTea
 
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack stack, BlockSelection blockSel, ref string failureCode)
-    {
-        if (byPlayer?.Entity?.Controls?.ShiftKey != true)
         {
-            return false;
+            if (byPlayer?.Entity?.Controls?.ShiftKey != true)
+            {
+                return false;
+            }
+            return base.TryPlaceBlock(world, byPlayer, stack, blockSel, ref failureCode);
         }
-        return base.TryPlaceBlock(world, byPlayer, stack, blockSel, ref failureCode);
-    }
 
 
 
@@ -438,15 +438,15 @@ namespace MakeTea
 
             // Only update attributes when the recipe's CODE actually changed
             var currentCode = stack.Attributes.GetString(CURRENT_RECIPE_ATTRIBUTE);
-            var foundCode   = foundRecipe?.Code;
+            var foundCode = foundRecipe?.Code;
 
             if (foundCode != currentCode)
             {
                 SetCurrentRecipe(stack, foundRecipe);
                 SetCraftingQuality(stack, 0);
-                // treat "craftingTime" as accumulated hot-hours of progress
                 SetCraftingTime(stack, 0);
-                LastUpdate = Now(api); // prevent a large dt on the first update after switching
+                
+                stack.Attributes.SetDouble("lastUpdateTime", Now(api)); 
             }
             return foundRecipe;
         }
@@ -507,11 +507,13 @@ namespace MakeTea
             if (currentRecipe == null) return MakeTransitionState(0, 1, BrewConvertState.Inactive);
 
             var now = Now(api);
-            double progressHotHours = GetCraftingTime(potStack, 0); // accumulated while > RT
-            double dt = Math.Max(0d, now - (LastUpdate ?? now));
-            LastUpdate = now;
 
+            double lastTime = potStack.Attributes.GetDouble("lastUpdateTime", now);
+            double dt = Math.Max(0d, now - lastTime);
+
+            double progressHotHours = GetCraftingTime(potStack, 0);
             var temperature = GetLiquidTemperature(potStack);
+
             if (temperature > ROOM_TEMPERATURE)
             {
                 progressHotHours = Math.Min(currentRecipe.Duration, progressHotHours + dt);
@@ -526,24 +528,34 @@ namespace MakeTea
 
             if (write)
             {
+                // save the current time to the stack to ensure the next delta-time (dt) is accurate
+                potStack.Attributes.SetDouble("lastUpdateTime", now);
+
                 if (crafted)
                 {
+                    // clear the recipe and update the physical contents of the teapot
                     SetCurrentRecipe(potStack, null);
                     for (int i = 0; i < inventory.Count; i++)
+                    {
                         contents[i] = inventory[i].Itemstack ?? new ItemStack();
+                    }
                     SetContents(potStack, contents);
-                    // no need to carry progress anymore
+
+                    // reset crafting progress and remove the timestamp attribute
                     SetCraftingTime(potStack, 0);
+                    potStack.Attributes.RemoveAttribute("lastUpdateTime");
                 }
                 else
                 {
-                    // persist the updated hot progress and keep improving quality by temperature match
                     SetCraftingTime(potStack, progressHotHours);
+
                     double match = currentRecipe.TemperatureMatch(temperature);
                     SetCraftingQuality(potStack, GetCraftingQuality(potStack) + match * dt);
                 }
             }
-            return MakeTransitionState(progressHotHours, currentRecipe.Duration, crafted ? BrewConvertState.Brewed : BrewConvertState.Brewing);
+
+            return MakeTransitionState(progressHotHours, currentRecipe.Duration,
+                crafted ? BrewConvertState.Brewed : BrewConvertState.Brewing);
 
         }
 
@@ -701,7 +713,7 @@ namespace MakeTea
         }
 
 
-        
+
 
         public override void TryMergeStacks(ItemStackMergeOperation op)
         {

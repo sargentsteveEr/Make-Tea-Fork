@@ -21,125 +21,165 @@ namespace MakeTea
         // runtime matching
         // TeapotRecipe.cs
         public bool Matches(ItemStack slot, out float normalizedQty)
-    {
-        normalizedQty = 0f;
-        if (slot == null) return false;
-
-        var coll = slot.Collectible;
-        if (coll == null) return false;
-
-        float qty = slot.StackSize;
-
-        // Treat any stack with containable props as liquid-ish (covers item portions)
-        var props = BlockLiquidContainerBase.GetContainableProps(slot);
-        if (props != null)
         {
-            if (props.ItemsPerLitre <= 0) return false;
-            qty /= props.ItemsPerLitre;
-        }
-        // (if props == null) it's a solid; leave qty as stack count
+            normalizedQty = 0f;
+            if (slot == null) return false;
 
-        normalizedQty = qty / Math.Max(1, Quantity);
+            var coll = slot.Collectible;
+            if (coll == null) return false;
 
-        // Prefer OR-match when Codes[] is present (API has array overloads)
-        if ((Codes?.Length ?? 0) > 0)
-        {
-            var any = Codes.Where(s => !string.IsNullOrWhiteSpace(s))
-                           .Select(s => new AssetLocation(s))
-                           .ToArray();
-            if (any.Length == 0) return false;
-            return coll.WildCardMatch(any);   // ← array overload, match-ANY :contentReference[oaicite:1]{index=1}
-        }
+            float qty = slot.StackSize;
 
-        if (Code == null) return false;
-        return coll.WildCardMatch(Code);
-    }
-
-
-
-
-            public override bool Resolve(IWorldAccessor resolver, string sourceForErrorLogging)
+            // Treat any stack with containable props as liquid-ish (covers item portions)
+            var props = BlockLiquidContainerBase.GetContainableProps(slot);
+            if (props != null)
             {
-                // if using single 'code' let vanilla do it.
-                if (Codes == null || Codes.Length == 0) return base.Resolve(resolver, sourceForErrorLogging);
+                if (props.ItemsPerLitre <= 0) return false;
+                qty /= props.ItemsPerLitre;
+            }
+            // (if props == null) it's a solid; leave qty as stack count
 
-                // expand each entry via a temporary vanilla ingredient,
-                // then keep one representative for handbook/UI.
-                ItemStack first = null;
-                bool any = false;
+            normalizedQty = qty / Math.Max(1, Quantity);
 
-                foreach (var wc in Codes)
+            // Prefer OR-match when Codes[] is present (API has array overloads)
+            if ((Codes?.Length ?? 0) > 0)
+            {
+                var any = Codes.Where(s => !string.IsNullOrWhiteSpace(s))
+                               .Select(s => new AssetLocation(s))
+                               .ToArray();
+                if (any.Length == 0) return false;
+                return coll.WildCardMatch(any);   // ← array overload, match-ANY :contentReference[oaicite:1]{index=1}
+            }
+
+            if (Code == null) return false;
+            return coll.WildCardMatch(Code);
+        }
+
+
+
+
+
+
+        public override bool Resolve(IWorldAccessor resolver, string sourceForErrorLogging)
+        {
+            if (Codes == null || Codes.Length == 0)
+            {
+                if (Code != null && MatchingType == EnumRecipeMatchType.Exact)
                 {
-                    if (string.IsNullOrWhiteSpace(wc)) continue;
-
-                    var temp = new CraftingRecipeIngredient
+                    string path = Code.Path ?? "";
+                    string domain = Code.Domain ?? "";
+                    if (path.IndexOf('*') >= 0 || path.IndexOf('{') >= 0 || domain.IndexOf('*') >= 0 || domain.IndexOf('{') >= 0)
                     {
-                        Type = this.Type,
-                        Code = new AssetLocation(wc),
-                        Quantity = this.Quantity,
-                        IsTool = this.IsTool,
-                        Name = this.Name,
-                        AllowedVariants = this.AllowedVariants,
-                        Attributes = this.Attributes
-                    };
-
-                    if (temp.Resolve(resolver, sourceForErrorLogging))
-                    {
-                        any = true;
-                        if (first == null) first = this.ResolvedItemStack;
+                        MatchingType = EnumRecipeMatchType.Wildcard;
                     }
                 }
 
-                if (any)
-                {
-                    this.ResolvedItemStack = first;
-                    return true;
-                }
-
-                resolver.Logger.Warning(
-                    "Teapot recipe ingredient could not resolve any of the codes [{0}] in {1}",
-                    string.Join(", ", Codes), sourceForErrorLogging
-                );
-                return false;
+                // Let vanilla resolve
+                return base.Resolve(resolver, sourceForErrorLogging);
             }
+
+            // expand each entry via a temporary vanilla ingredient,
+            // then keep one representative for handbook/UI.
+            ItemStack first = null;
+            bool any = false;
+
+            foreach (var wc in Codes)
+            {
+                if (string.IsNullOrWhiteSpace(wc)) continue;
+
+                var temp = new CraftingRecipeIngredient
+                {
+                    Type = this.Type,
+                    Code = new AssetLocation(wc),
+                    MatchingType = (wc.IndexOf('*') >= 0 || wc.IndexOf('{') >= 0) ? EnumRecipeMatchType.Wildcard : EnumRecipeMatchType.Exact,
+                    Quantity = this.Quantity,
+                    IsTool = this.IsTool,
+                    Name = this.Name,
+                    AllowedVariants = this.AllowedVariants,
+                    Attributes = this.Attributes
+                };
+
+                if (temp.Resolve(resolver, sourceForErrorLogging))
+                {
+                    any = true;
+                    if (first == null) first = temp.ResolvedItemStack;
+                }
+            }
+
+            if (any)
+            {
+                this.ResolvedItemStack = first;
+                return true;
+            }
+
+            resolver.Logger.Warning(
+                "Teapot recipe ingredient could not resolve any of the codes [{0}] in {1}",
+                string.Join(", ", Codes), sourceForErrorLogging
+            );
+            return false;
+        }
 
         // network serialization
-            public override void ToBytes(BinaryWriter writer)
+        public override void ToBytes(BinaryWriter writer)
+        {
+            var backup = Code;
+            if ((Codes?.Length ?? 0) > 0 && Code == null)
+                Code = new AssetLocation(Codes[0]);  // representative to satisfy base
+
+            base.ToBytes(writer);
+
+            writer.Write(Codes?.Length ?? 0);
+            if (Codes != null) foreach (var c in Codes) writer.Write(c);
+
+            Code = backup;
+        }
+
+        public override void FromBytes(BinaryReader reader, IWorldAccessor resolver)
+        {
+            base.FromBytes(reader, resolver);
+
+            int n = reader.ReadInt32();
+            if (n > 0)
             {
-                var backup = Code;
-                if ((Codes?.Length ?? 0) > 0 && Code == null)
-                    Code = new AssetLocation(Codes[0]);  // representative to satisfy base
+                Codes = new string[n];
+                for (int i = 0; i < n; i++) Codes[i] = reader.ReadString();
+            }
+            else Codes = null;
 
-                base.ToBytes(writer);
+            if ((Codes?.Length ?? 0) > 0 && Code == null)
+                Code = new AssetLocation(Codes[0]);  // belt & suspenders for client
+        }
 
-                writer.Write(Codes?.Length ?? 0);
-                if (Codes != null) foreach (var c in Codes) writer.Write(c);
+        public override CraftingRecipeIngredient Clone()
+        {
+            // create a TeapotRecipeIngredient but return it as the base type
+            var copy = new TeapotRecipeIngredient()
+            {
+                Type = this.Type,
+                Code = this.Code?.Clone(),
+                Quantity = this.Quantity,
+                IsTool = this.IsTool,
+                Name = this.Name,
+                AllowedVariants = this.AllowedVariants?.ToArray(),
+                Codes = this.Codes?.ToArray()
+            };
 
-                Code = backup;
+            if (this.Attributes != null)
+            {
+                copy.Attributes = this.Attributes.Clone();
             }
 
-            public override void FromBytes(BinaryReader reader, IWorldAccessor resolver)
-            {
-                base.FromBytes(reader, resolver);
+            return copy;
+        }
 
-                int n = reader.ReadInt32();
-                if (n > 0)
-                {
-                    Codes = new string[n];
-                    for (int i = 0; i < n; i++) Codes[i] = reader.ReadString();
-                }
-                else Codes = null;
 
-                if ((Codes?.Length ?? 0) > 0 && Code == null)
-                    Code = new AssetLocation(Codes[0]);  // belt & suspenders for client
-            }
 
 
         // If SDK instead requires IClassRegistryAPI, use this overload instead:
         // public override void FromBytes(BinaryReader reader, IClassRegistryAPI instancer) { ... same body ... }
-            
+
         // lil note lol
-        }
+    }
 
 
 
@@ -161,7 +201,7 @@ namespace MakeTea
             writer.Write(Litres);
         }
 
-        
+
 
         public new TeapotOutputStack Clone()
         {
@@ -218,7 +258,7 @@ namespace MakeTea
             writer.Write(MaxTemperature);
         }
 
-        
+
 
         public override void FromBytes(BinaryReader reader, IWorldAccessor resolver)
         {
@@ -241,8 +281,8 @@ namespace MakeTea
             MinTemperature = reader.ReadDouble();
             MaxTemperature = reader.ReadDouble();
         }
-        
-        
+
+
 
         public bool Matches(ItemStack[] stacks, float temperature, out float outsize)
         {
@@ -295,7 +335,7 @@ namespace MakeTea
             return NatFloat.Zero;
         }
 
-        
+
         public bool TryCraft(InventoryBase slots, float temperature, double craftingTime, double quality)
         {
             float outsize = 0;
@@ -311,25 +351,25 @@ namespace MakeTea
                 return false;
 
             for (int i = 0; i < Ingredients.Length && i < slots.Count; i++)
+            {
+                var quantity = Ingredients[i].Quantity;
+                var stack = slots[i].Itemstack;
+                if (stack == null) continue;
+
+                if (stack.Collectible.IsLiquid())
                 {
-                    var quantity = Ingredients[i].Quantity;
-                    var stack = slots[i].Itemstack;
-                    if (stack == null) continue;
-
-                    if (stack.Collectible.IsLiquid())
-                    {
-                        WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
-                        quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
-                    }
-
-                    int consume = (int)MathF.Round((float)quantity * outsize);
-                    stack.StackSize -= consume;
-
-                    if (stack.StackSize <= 0)
-                    {
-                        slots[i].Itemstack = null;
-                    }
+                    WaterTightContainableProps props = BlockLiquidContainerBase.GetContainableProps(slots[i].Itemstack);
+                    quantity = (int)(props.ItemsPerLitre * Ingredients[i].Quantity);
                 }
+
+                int consume = (int)MathF.Round((float)quantity * outsize);
+                stack.StackSize -= consume;
+
+                if (stack.StackSize <= 0)
+                {
+                    slots[i].Itemstack = null;
+                }
+            }
             var outputStack = Output.ResolvedItemstack.Clone();
             outputStack.StackSize = (int)(Output.Litres * BlockLiquidContainerBase.GetContainableProps(outputStack).ItemsPerLitre * outsize);
             double transition = (1.0 - Math.Clamp(quality / Duration, MIN_QUALITY, 1.0)) * GetTransitionDuration().avg;
@@ -355,7 +395,7 @@ namespace MakeTea
                 int firstStar = patternPath.IndexOf('*');
                 if (firstStar < 0) continue; // no wildcard in PATH -> nothing to expand
 
-                int lastStar  = patternPath.LastIndexOf('*');
+                int lastStar = patternPath.LastIndexOf('*');
                 int prefixLen = Math.Max(0, firstStar);
                 int suffixLen = Math.Max(0, patternPath.Length - lastStar - 1);
 
@@ -490,7 +530,6 @@ namespace MakeTea
         {
             if (recipe == null || !recipe.Enabled) return;
 
-            // Name is a RecipeBase field in 1.22 (same as vanilla BarrelRecipe)
             recipe.Name ??= path;
 
             // resolve all ingredient/output stacks
@@ -511,7 +550,6 @@ namespace MakeTea
             {
                 any = true;
 
-                // sub is IRecipeBase, but in practice these are clones of T
                 if (sub is T typed)
                 {
                     RegisterMethod(typed);

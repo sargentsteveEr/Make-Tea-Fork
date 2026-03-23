@@ -55,6 +55,25 @@
       },
       "scale": 0.5
     },
+    "displaycaseable": true,
+    "onDisplayTransform": {
+      "translation": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "rotation": {
+        "x": 0,
+        "y": -0.25,
+        "z": 0
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0,
+        "z": 0.5
+      },
+      "scale": 0.5
+    },
     "handbookByType": {
       "*-fired-*": {
         "groupBy": [ "teapot-*-fired-east" ],
@@ -65,6 +84,7 @@
           }
         ]
       }
+
     }
   },
   "attributesByType": {
@@ -133,7 +153,7 @@
       "maxTemperature": 100,
       "liquidContainerProps": {
         "capacityLitres": 2,
-        "transferSizeLitres":  0.2,
+        "transferSizeLitres": 0.2,
         "allowHeldLiquidTransfer": true,
         "emptyShapeLoc": "shapes/block/clay/teapot",
         "opaqueContentShapeLoc": "game:shapes/block/basic/nothing",

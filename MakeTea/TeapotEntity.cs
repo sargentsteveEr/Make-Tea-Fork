@@ -5,6 +5,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 using Vintagestory.API.Datastructures;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MakeTea
 {
@@ -72,7 +73,7 @@ namespace MakeTea
         }
     }
 
-    internal class TeapotEntity : BlockEntityLiquidContainer, ITemperatureSensitive
+    public class TeapotEntity : BlockEntityLiquidContainer
     {
         public override string InventoryClassName => "teapot";
 
@@ -86,7 +87,7 @@ namespace MakeTea
         private double brewStartedHours = 0;
         private double lastUpdateHours  = 0;
         
-        private const float PassiveCoolPerSecond = 0.1f;
+        private const double PassiveCoolPerSecond = 0.1f;
         private bool IsBrewing => brewStartedHours > 0;
         public TeapotEntity() : base()
         {
@@ -154,7 +155,7 @@ namespace MakeTea
         private void Inventory_SlotModified(int slotId)
         {
             if (slotId == Teapot.ITEM_SLOT)
-                CoolNow(0f); // Set item's temperature equal to the liquid's
+                CoolNow(0.0); // Set item's temperature equal to the liquid's
             Update();
         }
 
@@ -233,7 +234,7 @@ namespace MakeTea
 
 
             (inventory[Teapot.ITEM_SLOT] as ItemSlotTeapotInput).Initialize(api.World);
-            CoolNow(0f);
+            CoolNow(0.0);
             ownBlock = Block as Teapot;
 
             Props = new LiquidTopOpenContainerProps();
@@ -258,7 +259,7 @@ namespace MakeTea
                 if (t > Teapot.ROOM_TEMPERATURE + 0.1f)
                 {
                     // Small, smooth step; this also keeps ItemStack in sync via CoolNow()
-                    CoolNow(PassiveCoolPerSecond * dt);
+                    CoolNow(PassiveCoolPerSecond * (double)dt);
                 }
             }
         }
@@ -365,11 +366,12 @@ namespace MakeTea
             }
         }
 
-        public void CoolNow(float amountRel)
+        public void CoolNow(double amountRel)
         {
             var liquid = inventory[Teapot.LIQUID_SLOT]?.Itemstack;
-            var temperature = liquid?.Collectible?.GetTemperature(Api.World, liquid) ?? 0;
-            var newTemperature = Math.Max(Teapot.ROOM_TEMPERATURE, temperature - amountRel);
+
+            double temperature = liquid?.Collectible?.GetTemperature(Api.World, liquid) ?? 0;
+            double newTemperature = Math.Max(Teapot.ROOM_TEMPERATURE, temperature - amountRel);
 
             foreach (var slot in inventory)
             {
@@ -377,13 +379,13 @@ namespace MakeTea
                 if (stack?.Collectible != null)
                 {
                     if (stack.Collectible.GetTemperature(Api.World, stack) == newTemperature) continue;
-                    stack.Collectible.SetTemperature(Api.World, stack, newTemperature);
+                    stack.Collectible.SetTemperature(Api.World, stack, (float)newTemperature);
                     slot.MarkDirty();
                 }
             }
             if (ItemStack?.Collectible != null)
             {
-                ItemStack.Collectible.SetTemperature(Api.World, ItemStack, newTemperature);
+                ItemStack.Collectible.SetTemperature(Api.World, ItemStack, (float)newTemperature);
             }
         }
         

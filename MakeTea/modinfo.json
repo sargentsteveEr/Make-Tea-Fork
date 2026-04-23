@@ -9,7 +9,7 @@
     "Chronolegionnaire"
   ],
   "description": "Make clay teapots and mugs, brew tea and drink it",
-  "version": "0.8.0-dev.6",
+  "version": "0.8.1",
   "dependencies": {
     "game": ""
   }

@@ -3,7 +3,7 @@
   "variantGroups": [
     {
       "code": "herb",
-      "states": [ "lupine", "rafflesia", "croton", "heather", "catmint", "cornflower", "cowparsley", "westerngorse", "edelweiss", "forgetmenot", "goldenpoppy", "horsetail", "lilyofthevalley", "orangemallow", "redtopgrass", "wilddaisy", "woad" ]
+      "states": [ "lupine", "rafflesia", "croton", "heather", "catmint", "cornflower", "cowparsley", "westerngorse", "edelweiss", "forgetmenot", "goldenpoppy", "horsetail", "lilyofthevalley", "orangemallow", "redtopgrass", "wilddaisy", "woad", "bluebell", "ghostpipe", "daffodil", "mugwort", "licorice", "fennel" ]
     }
   ],
   "class": "ItemLiquidPortion",
@@ -83,6 +83,30 @@
         "*-croton": {
           "base": "game:block/food/pie/fill-parsnip",
           "alpha": 180
+        },
+        "*-bluebell": {
+          "base": "game:block/food/pie/fill-blueberry",
+          "alpha": 160
+        },
+        "*-ghostpipe": {
+          "base": "game:block/food/pie/fill-turnip",
+          "alpha": 100
+        },
+        "*-daffodil": {
+          "base": "game:block/food/pie/fill-pineapple",
+          "alpha": 160
+        },
+        "*-mugwort": {
+          "base": "game:block/food/pie/fill-cabbage",
+          "alpha": 180
+        },
+        "*-licorice": {
+          "base": "game:block/food/pie/fill-cassava",
+          "alpha": 200
+        },
+        "*-fennel": {
+          "base": "game:block/food/pie/fill-cabbage",
+          "alpha": 120
         }
       },
       "allowSpill": true,
@@ -104,6 +128,7 @@
           "foodCategory": "NoNutrition",
           "satiety": 0,
           "intoxication": 0.005,
+          "psychedelic": 0.1,
           "health": 0
         },
         "*-cornflower": {
@@ -140,6 +165,7 @@
           "foodCategory": "Fruit",
           "satiety": 10,
           "intoxication": 1,
+          "psychedelic": 0.3,
           "health": 7
         },
         "*-horsetail": {
@@ -195,6 +221,40 @@
           "satiety": 0,
           "intoxication": 0,
           "health": 0.5
+        },
+        "*-bluebell": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0.01,
+          "health": -1
+        },
+        "*-ghostpipe": {
+          "foodCategory": "NoNutrition",
+          "satiety": 1,
+          "intoxication": 0.1,
+          "health": -1
+        },
+        "*-daffodil": {
+          "foodCategory": "NoNutrition",
+          "satiety": 0,
+          "intoxication": 0,
+          "health": -5
+        },
+        "*-mugwort": {
+          "foodCategory": "NoNutrition",
+          "satiety": 10,
+          "psychedelic": 0.5,
+          "health": 0.5
+        },
+        "*-licorice": {
+          "satiety": 100,
+          "health": 0.5,
+          "foodcategory": "NoNutrition"
+        },
+        "*-fennel": {
+          "satiety": 110,
+          "health": 2,
+          "foodcategory": "NoNutrition"
         }
       }
     },
@@ -226,7 +286,7 @@
               {
                 "type": "item",
                 "code": "maketea:teaportion-{herb}",
-                "states": [ "lupine", "rafflesia", "croton", "heather", "catmint", "cornflower", "cowparsley", "westerngorse", "edelweiss", "forgetmenot", "goldenpoppy", "horsetail", "lilyofthevalley", "orangemallow", "redtopgrass", "wilddaisy", "woad" ],
+                "states": [ "lupine", "rafflesia", "croton", "heather", "catmint", "cornflower", "cowparsley", "westerngorse", "edelweiss", "forgetmenot", "goldenpoppy", "horsetail", "lilyofthevalley", "orangemallow", "redtopgrass", "wilddaisy", "woad", "bluebell", "ghostpipe", "daffodil", "mugwort", "licorice", "fennel" ],
                 "makefull": true
               }
             ]
@@ -303,7 +363,31 @@
     "*-croton": {
       "base": "game:block/food/pie/fill-parsnip",
       "alpha": 180
-    }
+    },
+    "*-bluebell": {
+      "base": "game:block/food/pie/fill-blueberry",
+      "alpha": 160
+    },
+    "*-ghostpipe": {
+      "base": "game:block/food/pie/fill-turnip",
+      "alpha": 100
+    },
+    "*-daffodil": {
+      "base": "game:block/food/pie/fill-pineapple",
+      "alpha": 160
+    },
+    "*-mugwort": {
+      "base": "game:block/food/pie/fill-cabbage",
+      "alpha": 180
+    },
+    "*-licorice": {
+      "base": "game:block/food/pie/fill-cassava",
+      "alpha": 200
+    },
+    "*-fennel": {
+      "base": "game:block/food/pie/fill-cabbage",
+      "alpha": 120
+    }    
   },
   "maxstacksize": 5000,
   "materialDensity": 200,
@@ -347,8 +431,8 @@
   "transitionableProps": [
     {
       "type": "Perish",
-      "freshHours": { "avg": 1 },
-      "transitionHours": { "avg": 128 },
+      "freshHours": { "avg": 12 },
+      "transitionHours": { "avg": 168 },
       "transitionedStack": {
         "type": "item",
         "code": "game:waterportion"

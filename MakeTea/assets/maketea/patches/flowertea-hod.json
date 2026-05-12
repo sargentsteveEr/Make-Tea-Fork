@@ -4,6 +4,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "heathertea-hod",
       "ingredients": 
@@ -31,6 +32,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "catminttea-hod",
       "ingredients": 
@@ -58,6 +60,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "cornflowertea-hod",
       "ingredients": 
@@ -85,6 +88,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "cowparsleytea-hod",
       "ingredients": 
@@ -112,6 +116,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "westerngorsetea-hod",
       "ingredients": 
@@ -139,6 +144,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "edelweisstea-hod",
       "ingredients": 
@@ -166,6 +172,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "forgetmenottea-hod",
       "ingredients": 
@@ -193,6 +200,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "goldenpoppytea-hod",
       "ingredients": 
@@ -220,6 +228,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "horsetailtea-hod",
       "ingredients": 
@@ -247,6 +256,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "lilyofthevalleytea-hod",
       "ingredients": 
@@ -274,6 +284,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "lupinetea-hod",
       "ingredients": 
@@ -301,6 +312,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "orangemallowtea-hod",
       "ingredients": 
@@ -328,6 +340,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "rafflesiatea-hod",
       "ingredients": 
@@ -355,6 +368,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "redtopgrasstea-hod",
       "ingredients": 
@@ -382,6 +396,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "wilddaisytea-hod",
       "ingredients": 
@@ -409,6 +424,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "woadtea-hod",
       "ingredients": 
@@ -436,6 +452,7 @@
     "file": "maketea:recipes/teapot/flowertea.json",
     "op": "addmerge",
     "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
     "value": {
       "code": "crotontea-hod",
       "ingredients": 
@@ -455,6 +472,126 @@
       "duration": 1,
       "minTemperature": 60,
       "maxTemperature": 90
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
+    "value": {
+      "code": "bluebelltea-hod",
+      "ingredients": [
+        {
+          "type": "item",
+          "codes": [ "hydrateordiedrate:*waterportion-*", "hydrateordiedrate:*waterportion*" ]
+        },
+        { "type": "block", "code": "game:flower-bluebell-free", "quantity": 1 }
+      ],
+      "output": { "type": "item", "code": "teaportion-bluebell", "litres": 1 },
+      "duration": 1.5,
+      "minTemperature": 70,
+      "maxTemperature": 90
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
+    "value": {
+      "code": "ghostpipetea-hod",
+      "ingredients": [
+        {
+          "type": "item",
+          "codes": [ "hydrateordiedrate:*waterportion-*", "hydrateordiedrate:*waterportion*" ]
+        },
+        { "type": "block", "code": "game:flower-ghostpipe*-free", "quantity": 1 }
+      ],
+      "output": { "type": "item", "code": "teaportion-ghostpipe", "litres": 1 },
+      "duration": 2.0,
+      "minTemperature": 80,
+      "maxTemperature": 100
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
+    "value": {
+      "code": "daffodiltea-hod",
+      "ingredients": [
+        {
+          "type": "item",
+          "codes": [ "hydrateordiedrate:*waterportion-*", "hydrateordiedrate:*waterportion*" ]
+        },
+        { "type": "block", "code": "game:flower-daffodil-free", "quantity": 1 }
+      ],
+      "output": { "type": "item", "code": "teaportion-daffodil", "litres": 1 },
+      "duration": 1.5,
+      "minTemperature": 70,
+      "maxTemperature": 90
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
+    "value": {
+      "code": "mugworttea-hod",
+      "ingredients": [
+        {
+          "type": "item",
+          "codes": [ "hydrateordiedrate:*waterportion-*", "hydrateordiedrate:*waterportion*" ]
+        },
+        { "type": "block", "code": "game:flower-mugwort-free", "quantity": 1 }
+      ],
+      "output": { "type": "item", "code": "teaportion-mugwort", "litres": 1 },
+      "duration": 2.5,
+      "minTemperature": 80,
+      "maxTemperature": 100
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
+    "value": {
+      "code": "licoricetea-hod",
+      "ingredients": [
+        { "type": "item", "codes": [ "hydrateordiedrate:*waterportion-*", "hydrateordiedrate:*waterportion*" ] },
+        { "type": "item", "code": "game:spice-licorice-raw", "quantity": 1 }
+      ],
+      "output": { "type": "item", "code": "teaportion-licorice", "litres": 1 },
+      "duration": 2.0,
+      "minTemperature": 80,
+      "maxTemperature": 100
+    }
+  },
+  {
+    "side": "server",
+    "file": "maketea:recipes/teapot/flowertea.json",
+    "op": "addmerge",
+    "path": "/-",
+    "dependsOn": [ { "modid": "hydrateordiedrate" } ],
+    "value": {
+      "code": "fenneltea-hod",
+      "ingredients": [
+        { "type": "item", "codes": [ "hydrateordiedrate:*waterportion-*", "hydrateordiedrate:*waterportion*" ] },
+        { "type": "item", "code": "game:vegetable-fennel", "quantity": 1 }
+      ],
+      "output": { "type": "item", "code": "teaportion-fennel", "litres": 1 },
+      "duration": 2.0,
+      "minTemperature": 80,
+      "maxTemperature": 100
     }
   }
 

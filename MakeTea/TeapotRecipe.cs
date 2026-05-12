@@ -28,31 +28,37 @@ namespace MakeTea
             var coll = slot.Collectible;
             if (coll == null) return false;
 
-            float qty = slot.StackSize;
+            // check if  item matches recipe 
+            bool codeMatches = false;
+            if (Codes != null && Codes.Length > 0)
+            {
+                foreach (var wildcard in Codes)
+                {
+                    if (coll.WildCardMatch(new AssetLocation(wildcard)))
+                    {
+                        codeMatches = true;
+                        break;
+                    }
+                }
+            }
+            else if (Code != null)
+            {
+                codeMatches = coll.WildCardMatch(Code);
+            }
 
-            // Treat any stack with containable props as liquid-ish (covers item portions)
+            if (!codeMatches) return false;
+
+            // calculate quantity 
+            float qty = slot.StackSize;
             var props = BlockLiquidContainerBase.GetContainableProps(slot);
             if (props != null)
             {
                 if (props.ItemsPerLitre <= 0) return false;
                 qty /= props.ItemsPerLitre;
             }
-            // (if props == null) it's a solid; leave qty as stack count
 
             normalizedQty = qty / Math.Max(1, Quantity);
-
-            // Prefer OR-match when Codes[] is present (API has array overloads)
-            if ((Codes?.Length ?? 0) > 0)
-            {
-                var any = Codes.Where(s => !string.IsNullOrWhiteSpace(s))
-                               .Select(s => new AssetLocation(s))
-                               .ToArray();
-                if (any.Length == 0) return false;
-                return coll.WildCardMatch(any);   // ← array overload, match-ANY :contentReference[oaicite:1]{index=1}
-            }
-
-            if (Code == null) return false;
-            return coll.WildCardMatch(Code);
+            return true;
         }
 
 

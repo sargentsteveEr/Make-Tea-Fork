@@ -14,7 +14,8 @@ namespace MakeTea
 
         public static bool CanHold(AssetLocation Code)
         {
-            return Code.FirstCodePart() == "flower";
+            string part = Code.FirstCodePart();
+            return part == "flower" || part == "spice" || part == "vegetable";
         }
 
         private IWorldAccessor World;
@@ -30,10 +31,10 @@ namespace MakeTea
             World = world;
         }
 
-        public override bool CanHold(ItemSlot sourceSlot)
+       public override bool CanHold(ItemSlot sourceSlot)
         {
-            Block block = sourceSlot?.Itemstack?.Block;
-            return block != null && CanHold(block.Code);
+            AssetLocation code = sourceSlot?.Itemstack?.Collectible?.Code;
+            return code != null && CanHold(code);
         }
 
         public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge)

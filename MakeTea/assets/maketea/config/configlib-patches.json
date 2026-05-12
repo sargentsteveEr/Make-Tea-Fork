@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "patches": {
+    "other": {
+      "maketea:itemtypes/liquid/tea.json": {
+        "transitionableProps": "SPOILAGE_MODE"
+      }
+    },
+    
+    "integer": {
+      "maketea:itemtypes/liquid/tea.json": {
+        "transitionableProps/0/freshHours/avg": "FRESH_HOURS",
+        "transitionableProps/0/transitionHours/avg": "ROT_HOURS"
+      },
+      
+      "maketea:recipes/teapot/flowertea.json": {
+        "0/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : HEATHER_TEA_MIN_TEMP", "0/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : HEATHER_TEA_MAX_TEMP",
+        "1/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : CATMINT_TEA_MIN_TEMP", "1/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : CATMINT_TEA_MAX_TEMP",
+        "2/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : CORNFLOWER_TEA_MIN_TEMP", "2/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : CORNFLOWER_TEA_MAX_TEMP",
+        "3/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : COWPARSLEY_TEA_MIN_TEMP", "3/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : COWPARSLEY_TEA_MAX_TEMP",
+        "4/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : WESTERNGORSE_TEA_MIN_TEMP", "4/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : WESTERNGORSE_TEA_MAX_TEMP",
+        "5/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : EDELWEISS_TEA_MIN_TEMP", "5/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : EDELWEISS_TEA_MAX_TEMP",
+        "6/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : FORGETMENOT_TEA_MIN_TEMP", "6/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : FORGETMENOT_TEA_MAX_TEMP",
+        "7/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : GOLDENPOPPY_TEA_MIN_TEMP", "7/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : GOLDENPOPPY_TEA_MAX_TEMP",
+        "8/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : HORSETAIL_TEA_MIN_TEMP", "8/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : HORSETAIL_TEA_MAX_TEMP",
+        "9/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : LILYOFTHEVALLEY_TEA_MIN_TEMP", "9/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : LILYOFTHEVALLEY_TEA_MAX_TEMP",
+        "10/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : ORANGEMALLOW_TEA_MIN_TEMP", "10/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : ORANGEMALLOW_TEA_MAX_TEMP",
+        "11/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : REDTOPGRASS_TEA_MIN_TEMP", "11/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : REDTOPGRASS_TEA_MAX_TEMP",
+        "12/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : WILDDAISY_TEA_MIN_TEMP", "12/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : WILDDAISY_TEA_MAX_TEMP",
+        "13/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : WOAD_TEA_MIN_TEMP", "13/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : WOAD_TEA_MAX_TEMP",
+        "14/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : BLUEBELL_TEA_MIN_TEMP", "14/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : BLUEBELL_TEA_MAX_TEMP",
+        "15/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : GHOSTPIPE_TEA_MIN_TEMP", "15/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : GHOSTPIPE_TEA_MAX_TEMP",
+        "16/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : DAFFODIL_TEA_MIN_TEMP", "16/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : DAFFODIL_TEA_MAX_TEMP",
+        "17/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : MUGWORT_TEA_MIN_TEMP", "17/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : MUGWORT_TEA_MAX_TEMP",
+        "18/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : LICORICE_TEA_MIN_TEMP", "18/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : LICORICE_TEA_MAX_TEMP",
+        "19/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : FENNEL_TEA_MIN_TEMP", "19/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : FENNEL_TEA_MAX_TEMP"
+      },
+      "maketea:patches/flowertea-hod.json": {
+        "0/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : HEATHER_TEA_MIN_TEMP", "0/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : HEATHER_TEA_MAX_TEMP",
+        "1/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : CATMINT_TEA_MIN_TEMP", "1/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : CATMINT_TEA_MAX_TEMP",
+        "2/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : CORNFLOWER_TEA_MIN_TEMP", "2/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : CORNFLOWER_TEA_MAX_TEMP",
+        "3/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : COWPARSLEY_TEA_MIN_TEMP", "3/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : COWPARSLEY_TEA_MAX_TEMP",
+        "4/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : WESTERNGORSE_TEA_MIN_TEMP", "4/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : WESTERNGORSE_TEA_MAX_TEMP",
+        "5/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : EDELWEISS_TEA_MIN_TEMP", "5/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : EDELWEISS_TEA_MAX_TEMP",
+        "6/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : FORGETMENOT_TEA_MIN_TEMP", "6/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : FORGETMENOT_TEA_MAX_TEMP",
+        "7/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : GOLDENPOPPY_TEA_MIN_TEMP", "7/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : GOLDENPOPPY_TEA_MAX_TEMP",
+        "8/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : HORSETAIL_TEA_MIN_TEMP", "8/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : HORSETAIL_TEA_MAX_TEMP",
+        "9/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : LILYOFTHEVALLEY_TEA_MIN_TEMP", "9/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : LILYOFTHEVALLEY_TEA_MAX_TEMP",
+        "10/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : ORANGEMALLOW_TEA_MIN_TEMP", "10/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : ORANGEMALLOW_TEA_MAX_TEMP",
+        "11/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : REDTOPGRASS_TEA_MIN_TEMP", "11/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : REDTOPGRASS_TEA_MAX_TEMP",
+        "12/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : WILDDAISY_TEA_MIN_TEMP", "12/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : WILDDAISY_TEA_MAX_TEMP",
+        "13/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : WOAD_TEA_MIN_TEMP", "13/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : WOAD_TEA_MAX_TEMP",
+        "14/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : BLUEBELL_TEA_MIN_TEMP", "14/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : BLUEBELL_TEA_MAX_TEMP",
+        "15/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : GHOSTPIPE_TEA_MIN_TEMP", "15/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : GHOSTPIPE_TEA_MAX_TEMP",
+        "16/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : DAFFODIL_TEA_MIN_TEMP", "16/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : DAFFODIL_TEA_MAX_TEMP",
+        "17/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : MUGWORT_TEA_MIN_TEMP", "17/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : MUGWORT_TEA_MAX_TEMP",
+        "18/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : LICORICE_TEA_MIN_TEMP", "18/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : LICORICE_TEA_MAX_TEMP",
+        "19/value/minTemperature": "(IGNORE_TEMPERATURE) ? 0 : FENNEL_TEA_MIN_TEMP", "19/value/maxTemperature": "(IGNORE_TEMPERATURE) ? 999 : FENNEL_TEA_MAX_TEMP"
+      }
+    }
+  },
+  "settings": {
+    "boolean": {
+      "IGNORE_TEMPERATURE": {
+        "name": "ignore-temperature",
+        "comment": "Disable temperature requirements (teas will brew at any temp)",
+        "default": false,
+        "weight": 0.1
+      }
+    },
+
+    "other": {
+      "SPOILAGE_MODE": {
+        "name": "Tea spoilage mode",
+        "comment": "Enable or Disable tea spoilage (Transitioning back into water)",
+        "default": "Enabled",
+        "weight": 0.2,
+        "mapping": {
+          "Enabled": [
+            {
+              "type": "Perish",
+              "freshHours": { "avg": 12 },
+              "transitionHours": { "avg": 168 },
+              "transitionedStack": {
+                "type": "item",
+                "code": "game:waterportion"
+              },
+              "transitionRatio": 1
+            }
+          ],
+          "Disabled": []
+        }
+      }
+    },
+
+    "integer": {
+      "FRESH_HOURS": {
+        "name": "spoil-fresh-hours",
+        "comment": "How many hours before tea starts spoiling (Default 12 hours)",
+        "default": 12,
+        "weight": 0.3,
+        "range": { "min": 1, "max": 100 }
+      },
+      "ROT_HOURS": {
+        "name": "spoil-rot-hours",
+        "comment": "How many hours it takes for tea to turn back into water (Default 168 hours)",
+        "default": 168,
+        "weight": 0.4,
+        "range": { "min": 1, "max": 500 }
+      },
+
+      "HEATHER_TEA_MIN_TEMP": { "name": "heather-tea-min-temp", "comment": "Minimum brewing temperature", "default": 60, "weight": 1.1, "range": { "min": 0, "max": 100 } },
+      "HEATHER_TEA_MAX_TEMP": { "name": "heather-tea-max-temp", "comment": "Maximum brewing temperature", "default": 80, "weight": 1.2, "range": { "min": 0, "max": 100 } },
+      
+      "CATMINT_TEA_MIN_TEMP": { "name": "catmint-tea-min-temp", "comment": "Minimum brewing temperature", "default": 40, "weight": 2.1, "range": { "min": 0, "max": 100 } },
+      "CATMINT_TEA_MAX_TEMP": { "name": "catmint-tea-max-temp", "comment": "Maximum brewing temperature", "default": 60, "weight": 2.2, "range": { "min": 0, "max": 100 } },
+      
+      "CORNFLOWER_TEA_MIN_TEMP": { "name": "cornflower-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 3.1, "range": { "min": 0, "max": 100 } },
+      "CORNFLOWER_TEA_MAX_TEMP": { "name": "cornflower-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 3.2, "range": { "min": 0, "max": 100 } },
+      
+      "COWPARSLEY_TEA_MIN_TEMP": { "name": "cowparsley-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 4.1, "range": { "min": 0, "max": 100 } },
+      "COWPARSLEY_TEA_MAX_TEMP": { "name": "cowparsley-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 4.2, "range": { "min": 0, "max": 100 } },
+      
+      "WESTERNGORSE_TEA_MIN_TEMP": { "name": "westerngorse-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 5.1, "range": { "min": 0, "max": 100 } },
+      "WESTERNGORSE_TEA_MAX_TEMP": { "name": "westerngorse-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 5.2, "range": { "min": 0, "max": 100 } },
+      
+      "EDELWEISS_TEA_MIN_TEMP": { "name": "edelweiss-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 6.1, "range": { "min": 0, "max": 100 } },
+      "EDELWEISS_TEA_MAX_TEMP": { "name": "edelweiss-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 6.2, "range": { "min": 0, "max": 100 } },
+      
+      "FORGETMENOT_TEA_MIN_TEMP": { "name": "forgetmenot-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 7.1, "range": { "min": 0, "max": 100 } },
+      "FORGETMENOT_TEA_MAX_TEMP": { "name": "forgetmenot-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 7.2, "range": { "min": 0, "max": 100 } },
+      
+      "GOLDENPOPPY_TEA_MIN_TEMP": { "name": "goldenpoppy-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 8.1, "range": { "min": 0, "max": 100 } },
+      "GOLDENPOPPY_TEA_MAX_TEMP": { "name": "goldenpoppy-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 8.2, "range": { "min": 0, "max": 100 } },
+      
+      "HORSETAIL_TEA_MIN_TEMP": { "name": "horsetail-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 9.1, "range": { "min": 0, "max": 100 } },
+      "HORSETAIL_TEA_MAX_TEMP": { "name": "horsetail-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 9.2, "range": { "min": 0, "max": 100 } },
+      
+      "LILYOFTHEVALLEY_TEA_MIN_TEMP": { "name": "lilyofthevalley-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 10.1, "range": { "min": 0, "max": 100 } },
+      "LILYOFTHEVALLEY_TEA_MAX_TEMP": { "name": "lilyofthevalley-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 10.2, "range": { "min": 0, "max": 100 } },
+      
+      "ORANGEMALLOW_TEA_MIN_TEMP": { "name": "orangemallow-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 11.1, "range": { "min": 0, "max": 100 } },
+      "ORANGEMALLOW_TEA_MAX_TEMP": { "name": "orangemallow-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 11.2, "range": { "min": 0, "max": 100 } },
+      
+      "REDTOPGRASS_TEA_MIN_TEMP": { "name": "redtopgrass-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 12.1, "range": { "min": 0, "max": 100 } },
+      "REDTOPGRASS_TEA_MAX_TEMP": { "name": "redtopgrass-tea-max-temp", "comment": "Maximum brewing temperature", "default": 80, "weight": 12.2, "range": { "min": 0, "max": 100 } },
+      
+      "WILDDAISY_TEA_MIN_TEMP": { "name": "wilddaisy-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 13.1, "range": { "min": 0, "max": 100 } },
+      "WILDDAISY_TEA_MAX_TEMP": { "name": "wilddaisy-tea-max-temp", "comment": "Maximum brewing temperature", "default": 60, "weight": 13.2, "range": { "min": 0, "max": 100 } },
+      
+      "WOAD_TEA_MIN_TEMP": { "name": "woad-tea-min-temp", "comment": "Minimum brewing temperature", "default": 80, "weight": 14.1, "range": { "min": 0, "max": 100 } },
+      "WOAD_TEA_MAX_TEMP": { "name": "woad-tea-max-temp", "comment": "Maximum brewing temperature", "default": 90, "weight": 14.2, "range": { "min": 0, "max": 100 } },
+      
+      "BLUEBELL_TEA_MIN_TEMP": { "name": "bluebell-tea-min-temp", "comment": "Minimum brewing temperature", "default": 40, "weight": 15.1, "range": { "min": 0, "max": 100 } },
+      "BLUEBELL_TEA_MAX_TEMP": { "name": "bluebell-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 15.2, "range": { "min": 0, "max": 100 } },
+      
+      "GHOSTPIPE_TEA_MIN_TEMP": { "name": "ghostpipe-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 16.1, "range": { "min": 0, "max": 100 } },
+      "GHOSTPIPE_TEA_MAX_TEMP": { "name": "ghostpipe-tea-max-temp", "comment": "Maximum brewing temperature", "default": 80, "weight": 16.2, "range": { "min": 0, "max": 100 } },
+      
+      "DAFFODIL_TEA_MIN_TEMP": { "name": "daffodil-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 17.1, "range": { "min": 0, "max": 100 } },
+      "DAFFODIL_TEA_MAX_TEMP": { "name": "daffodil-tea-max-temp", "comment": "Maximum brewing temperature", "default": 70, "weight": 17.2, "range": { "min": 0, "max": 100 } },
+      
+      "MUGWORT_TEA_MIN_TEMP": { "name": "mugwort-tea-min-temp", "comment": "Minimum brewing temperature", "default": 60, "weight": 18.1, "range": { "min": 0, "max": 100 } },
+      "MUGWORT_TEA_MAX_TEMP": { "name": "mugwort-tea-max-temp", "comment": "Maximum brewing temperature", "default": 90, "weight": 18.2, "range": { "min": 0, "max": 100 } },
+
+      "LICORICE_TEA_MIN_TEMP": { "name": "licorice-tea-min-temp", "comment": "Minimum brewing temperature", "default": 60, "weight": 19.1, "range": { "min": 0, "max": 100 } },
+      "LICORICE_TEA_MAX_TEMP": { "name": "licorice-tea-max-temp", "comment": "Maximum brewing temperature", "default": 90, "weight": 19.2, "range": { "min": 0, "max": 100 } },
+      
+      "FENNEL_TEA_MIN_TEMP": { "name": "fennel-tea-min-temp", "comment": "Minimum brewing temperature", "default": 50, "weight": 20.1, "range": { "min": 0, "max": 100 } },
+      "FENNEL_TEA_MAX_TEMP": { "name": "fennel-tea-max-temp", "comment": "Maximum brewing temperature", "default": 80, "weight": 20.2, "range": { "min": 0, "max": 100 } }
+    }
+  },
+  "formatting": [
+    { "type": "separator", "title": "Spoilage Settings", "weight": 0.15 },
+    { "type": "separator", "title": "Heather", "weight": 1.0 },
+    { "type": "separator", "title": "Catmint", "weight": 2.0 },
+    { "type": "separator", "title": "Cornflower", "weight": 3.0 },
+    { "type": "separator", "title": "Cowparsley", "weight": 4.0 },
+    { "type": "separator", "title": "Western Gorse", "weight": 5.0 },
+    { "type": "separator", "title": "Edelweiss", "weight": 6.0 },
+    { "type": "separator", "title": "Forget-me-not", "weight": 7.0 },
+    { "type": "separator", "title": "Golden Poppy", "weight": 8.0 },
+    { "type": "separator", "title": "Horsetail", "weight": 9.0 },
+    { "type": "separator", "title": "Lily of the Valley", "weight": 10.0 },
+    { "type": "separator", "title": "Orange Mallow", "weight": 11.0 },
+    { "type": "separator", "title": "Redtop Grass", "weight": 12.0 },
+    { "type": "separator", "title": "Wild Daisy", "weight": 13.0 },
+    { "type": "separator", "title": "Woad", "weight": 14.0 },
+    { "type": "separator", "title": "Bluebell", "weight": 15.0 },
+    { "type": "separator", "title": "Ghost Pipe", "weight": 16.0 },
+    { "type": "separator", "title": "Daffodil", "weight": 17.0 },
+    { "type": "separator", "title": "Mugwort", "weight": 18.0 },
+    { "type": "separator", "title": "Licorice", "weight": 19.0 },
+    { "type": "separator", "title": "Fennel", "weight": 20.0 }
+  ]
+}

@@ -27,9 +27,13 @@ namespace MakeTea
 
         public override void FromBytes(IWorldAccessor resolver, int quantity, byte[] data)
         {
+            // step 1
+            Recipes.Clear();
+
+            // step 2
             base.FromBytes(resolver, quantity, data);
 
-            // Rebuild fast lookup after sync from server -> client
+            // step 3 - Rebuild fast lookup after sync from server -> client
             lookupMap.Clear();
             foreach (var recipe in Recipes)
             {
@@ -65,6 +69,7 @@ namespace MakeTea
                 harmony = new Harmony(Mod.Info.ModID);
                 harmony.PatchAll();
             }
+
         }
         public override void AssetsLoaded(ICoreAPI api)
         {

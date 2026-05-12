@@ -126,7 +126,7 @@ public static class HandbookPatch
                 components.Add(comp);
                 var minTemperature = dstack.Attributes.TryGetDouble("__maketea_min_temperature");
                 var maxTemperature = dstack.Attributes.TryGetDouble("__maketea_max_temperature");
-                if (minTemperature != null && maxTemperature != null)
+                if (minTemperature != null && maxTemperature != null && maxTemperature < 900)
                 {
                     var temperatureHint = new RichTextComponent(
                         capi,

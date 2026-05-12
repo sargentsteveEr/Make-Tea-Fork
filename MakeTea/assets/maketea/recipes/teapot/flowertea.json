@@ -375,5 +375,72 @@
     "duration": 1.5,
     "minTemperature": 60,
     "maxTemperature": 90
+  },
+
+  {
+    "code": "bluebelltea",
+    "ingredients": [
+      { "type": "item", "code": "game:waterportion" },
+      { "type": "block", "code": "game:flower-bluebell-free", "quantity": 1 }
+    ],
+    "output": { "type": "item", "code": "teaportion-bluebell", "litres": 1 },
+    "duration": 1.5,
+    "minTemperature": 70,
+    "maxTemperature": 90
+  },
+  {
+    "code": "ghostpipetea",
+    "ingredients": [
+      { "type": "item", "code": "game:waterportion" },
+      { "type": "block", "code": "game:flower-ghostpipe*-free", "quantity": 1 }
+    ],
+    "output": { "type": "item", "code": "teaportion-ghostpipe", "litres": 1 },
+    "duration": 2.0,
+    "minTemperature": 80,
+    "maxTemperature": 100
+  },
+  {
+    "code": "daffodiltea",
+    "ingredients": [
+      { "type": "item", "code": "game:waterportion" },
+      { "type": "block", "code": "game:flower-daffodil-free", "quantity": 1 }
+    ],
+    "output": { "type": "item", "code": "teaportion-daffodil", "litres": 1 },
+    "duration": 1.5,
+    "minTemperature": 70,
+    "maxTemperature": 90
+  },
+  {
+    "code": "mugworttea",
+    "ingredients": [
+      { "type": "item", "code": "game:waterportion" },
+      { "type": "block", "code": "game:flower-mugwort-free", "quantity": 1 }
+    ],
+    "output": { "type": "item", "code": "teaportion-mugwort", "litres": 1 },
+    "duration": 2.5,
+    "minTemperature": 80,
+    "maxTemperature": 100
+  },
+  {
+    "code": "licoricetea",
+    "ingredients": [
+      { "type": "item", "code": "game:waterportion" },
+      { "type": "item", "code": "game:spice-licorice-raw", "quantity": 1 }
+    ],
+    "output": { "type": "item", "code": "teaportion-licorice", "litres": 1 },
+    "duration": 2.0,
+    "minTemperature": 80,
+    "maxTemperature": 100
+  },
+  {
+    "code": "fenneltea",
+    "ingredients": [
+      { "type": "item", "code": "game:waterportion" },
+      { "type": "item", "code": "game:vegetable-fennel", "quantity": 1 }
+    ],
+    "output": { "type": "item", "code": "teaportion-fennel", "litres": 1 },
+    "duration": 2.0,
+    "minTemperature": 80,
+    "maxTemperature": 100
   }
 ]

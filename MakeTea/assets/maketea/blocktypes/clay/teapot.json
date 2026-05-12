@@ -26,7 +26,7 @@
   "variantgroups": [
     {
       "code": "color",
-      "states": [ "blue", "fire", "black", "brown", "cream", "gray", "orange", "red", "tan" ]
+      "states": [ "blue", "fire", "black", "brown", "cream", "gray", "orange", "red", "tan", "earthyorange" ]
     },
     {
       "code": "state",
@@ -43,7 +43,8 @@
     "teapot-cream-raw-*",
     "teapot-gray-raw-*",
     "teapot-orange-raw-*",
-    "teapot-tan-raw-*"
+    "teapot-tan-raw-*",
+    "teapot-earthyorange-raw-*"
   ],
   "attributes": {
     "shelvable": true,
@@ -169,7 +170,7 @@
       "smeltingType": "fire",
       "smeltedStack": {
         "type": "block",
-        "code": "teapot-blue-fired-east"
+        "code": "teapot-earthyorange-fired-east"
       },
       "requiresContainer": false
     },
@@ -180,7 +181,7 @@
       "smeltingType": "fire",
       "smeltedStack": {
         "type": "block",
-        "code": "teapot-blue-fired-east"
+        "code": "teapot-{color}-fired-east"
       },
       "requiresContainer": false
     },

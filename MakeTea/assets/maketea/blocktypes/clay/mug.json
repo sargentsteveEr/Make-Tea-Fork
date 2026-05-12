@@ -29,7 +29,7 @@
   "variantgroups": [
     {
       "code": "color",
-      "states": [ "blue", "fire", "black", "brown", "cream", "gray", "orange", "red", "tan" ]
+      "states": [ "blue", "fire", "black", "brown", "cream", "gray", "orange", "red", "tan", "earthyorange" ]
     },
     {
       "code": "state",
@@ -46,7 +46,8 @@
     "mug-cream-raw-*",
     "mug-gray-raw-*",
     "mug-orange-raw-*",
-    "mug-tan-raw-*"
+    "mug-tan-raw-*",
+    "mug-earthyorange-raw-*"
   ],
   "attributes": {
     "shelvable": true,
@@ -140,9 +141,9 @@
       "meltingDuration": 45,
       "smeltedRatio": 1,
       "smeltingType": "fire",
-      "smeltedStack": {
-        "type": "block",
-        "code": "mug-blue-fired-east"
+      "smeltedStack": { "type": 
+        "block", "code": 
+        "mug-earthyorange-fired-east" 
       },
       "requiresContainer": false
     },
@@ -151,9 +152,9 @@
       "meltingDuration": 45,
       "smeltedRatio": 1,
       "smeltingType": "fire",
-      "smeltedStack": {
-        "type": "block",
-        "code": "mug-blue-fired-east"
+      "smeltedStack": { 
+        "type": "block", 
+        "code": "mug-{color}-fired-east" 
       },
       "requiresContainer": false
     },

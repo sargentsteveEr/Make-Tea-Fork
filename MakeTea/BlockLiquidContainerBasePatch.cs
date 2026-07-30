@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
@@ -31,6 +32,7 @@ public class BlockLiquidContainerBasePatch
         if (handle)
         {
             __state.OldSize = contentStack?.StackSize ?? 0;
+            __state.OldSlotStackSize = slot.Itemstack?.StackSize ?? 0;
             __state.ContentStack = contentStack;
         }
     }
@@ -40,9 +42,30 @@ public class BlockLiquidContainerBasePatch
         BlockLiquidContainerBase __instance, TryEatStopState __state,
         float secondsUsed, ItemSlot slot, EntityAgent byEntity)
     {
-        if (__state.OldSize <= 0 || __state.ContentStack == null || slot.Itemstack == null) return;
+        if (__state.OldSize <= 0 || __state.ContentStack == null || slot.Itemstack == null || __state.OldSlotStackSize == 0) return;
 
-        var consumedSize = __state.OldSize - (__instance.GetContent(slot.Itemstack)?.StackSize ?? 0);
+        int currentSize;
+        if (__state.OldSlotStackSize > (slot.Itemstack?.StackSize ?? 0))
+        {
+            // We need to find the item that was split from the original stack.
+            // I don't really know how to do this property, so this is my [JT] best attempt:
+            // 1. look for dirty slots in player inventory,
+            // 2. find slots matching the itemId, ignoring current slot, take first,
+            // 3. check for content size there.
+            var slitSlot = byEntity.ActiveHandItemSlot.Inventory.Where(
+                (s, i) =>
+                    s != slot &&
+                    byEntity.ActiveHandItemSlot.Inventory.DirtySlots.Contains(i) &&
+                    s.Itemstack?.Id == slot.Itemstack?.Id
+                ).FirstOrDefault();
+            currentSize = __instance.GetContent(slitSlot?.Itemstack)?.StackSize ?? 0;
+        }
+        else
+        {
+            currentSize = __instance.GetContent(slot.Itemstack)?.StackSize ?? 0;
+        }
+
+        var consumedSize = __state.OldSize - currentSize;
         if (consumedSize <= 0) return;
 
         var dummySlot = typeof(BlockLiquidContainerBase)
@@ -54,9 +77,14 @@ public class BlockLiquidContainerBasePatch
 
         if (api == null) return;
 
+        // api.Logger.Debug(
+        //     "MakeTeaMod: entity [{0}] consuming {1} units of [{2}] liquid from container [{3}]",
+        //     byEntity.GetName(), consumedSize, __state.ContentStack.GetName(), slot.Itemstack.GetName());
+
         var states = __state.ContentStack.Collectible.UpdateAndGetTransitionStates(api.World, dummySlot);
         var spoilState = states.FirstOrDefault(s => s.Props.Type == EnumTransitionType.Perish)?.TransitionLevel ?? 0f;
         var containableProps = BlockLiquidContainerBase.GetContainableProps(__state.ContentStack);
+
         if (containableProps == null) return;
 
         var stabilityGain = __state.ContentStack.Item.Attributes["makeTeaPortionProps"]["stabilityGain"].AsFloat();
@@ -76,5 +104,6 @@ public class BlockLiquidContainerBasePatch
     {
         public ItemStack ContentStack;
         public int OldSize;
+        public int OldSlotStackSize;
     }
 }

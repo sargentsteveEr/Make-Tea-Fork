@@ -150,5 +150,23 @@ namespace MakeTea
             SingleComposer.GetDynamicText("brewText")?.SetNewText(BrewText());
             SingleComposer.GetDynamicText("temperature").SetNewText(TemperatureText());
         }
+
+        // A brutally simple workaround for client crash in VS 1.22.5, where base.OnFinalizeFrame throws an uncaught NRE.
+        // This whole override can probably be deleted once it is fixed in VS.
+        public override void OnFinalizeFrame(float dt)
+        {
+            try
+            {
+                base.OnFinalizeFrame(dt);
+            }
+            catch (NullReferenceException e)
+            {
+                capi.Logger.Debug(
+                    $"GuiDialogTeapot: prevented an NRE from base.OnFinalizeFrame:\n{e.Message}\n{e.StackTrace?.Split('\n')[0]} [...]");
+
+                // Remaining code from base.OnFinalizeFrame:
+                capi.Event.EnqueueMainThreadTask((Action) (() => this.TryClose()), "closedlg");
+            }
+        }
     }
 }

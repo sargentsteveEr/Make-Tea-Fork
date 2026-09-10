@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Vintagestory.API.Common;
@@ -12,6 +10,10 @@ namespace MakeTea;
 [HarmonyPatch(typeof(BlockLiquidContainerBase), "tryEatStop")]
 public class BlockLiquidContainerBasePatch
 {
+    // cache reflection calls for better performance during gameplay
+    private static readonly MethodInfo GetContentInDummySlotMethod = AccessTools.Method(typeof(BlockLiquidContainerBase), "GetContentInDummySlot");
+    private static readonly FieldInfo ApiField = AccessTools.Field(typeof(BlockLiquidContainerBase), "api");
+
     [HarmonyPrefix]
     public static void TryEatStopPrefix(
         BlockLiquidContainerBase __instance, out TryEatStopState __state,
@@ -47,17 +49,20 @@ public class BlockLiquidContainerBasePatch
         int currentSize;
         if (__state.OldSlotStackSize > (slot.Itemstack?.StackSize ?? 0))
         {
-            // We need to find the item that was split from the original stack.
-            // I don't really know how to do this property, so this is my [JT] best attempt:
-            // 1. look for dirty slots in player inventory,
-            // 2. find slots matching the itemId, ignoring current slot, take first,
-            // 3. check for content size there.
-            var slitSlot = byEntity.ActiveHandItemSlot.Inventory.Where(
-                (s, i) =>
-                    s != slot &&
-                    byEntity.ActiveHandItemSlot.Inventory.DirtySlots.Contains(i) &&
-                    s.Itemstack?.Id == slot.Itemstack?.Id
-                ).FirstOrDefault();
+            // use a standard loop instead of LINQ for better performance
+            ItemSlot slitSlot = null;
+            var inventory = byEntity.ActiveHandItemSlot.Inventory;
+
+            for (int i = 0; i < inventory.Count; i++)
+            {
+                var s = inventory[i];
+                if (s != slot && inventory.DirtySlots.Contains(i) && s.Itemstack?.Id == slot.Itemstack?.Id)
+                {
+                    slitSlot = s;
+                    break;
+                }
+            }
+
             currentSize = __instance.GetContent(slitSlot?.Itemstack)?.StackSize ?? 0;
         }
         else
@@ -68,21 +73,29 @@ public class BlockLiquidContainerBasePatch
         var consumedSize = __state.OldSize - currentSize;
         if (consumedSize <= 0) return;
 
-        var dummySlot = typeof(BlockLiquidContainerBase)
-            .GetMethod("GetContentInDummySlot", BindingFlags.Instance | BindingFlags.NonPublic)?
-            .Invoke(__instance, [slot, __state.ContentStack]) as ItemSlot;
-        var api = typeof(BlockLiquidContainerBase)
-            .GetField("api", BindingFlags.Instance | BindingFlags.NonPublic)?
-            .GetValue(__instance) as ICoreAPI;
+        // use the cached reflection fields
+        var dummySlot = GetContentInDummySlotMethod?.Invoke(__instance, new object[] { slot, __state.ContentStack }) as ItemSlot;
+        var api = ApiField?.GetValue(__instance) as ICoreAPI;
 
         if (api == null) return;
 
-        // api.Logger.Debug(
-        //     "MakeTeaMod: entity [{0}] consuming {1} units of [{2}] liquid from container [{3}]",
-        //     byEntity.GetName(), consumedSize, __state.ContentStack.GetName(), slot.Itemstack.GetName());
-
         var states = __state.ContentStack.Collectible.UpdateAndGetTransitionStates(api.World, dummySlot);
-        var spoilState = states.FirstOrDefault(s => s.Props.Type == EnumTransitionType.Perish)?.TransitionLevel ?? 0f;
+        
+        // using a loop instead of LINQ FirstOrDefault to find the spoil state
+        // should remove all the LINQ overhead too from the postFix method, not by much compared to other mods but every frame counts, yeah?
+        float spoilState = 0f;
+        if (states != null)
+        {
+            foreach (var s in states)
+            {
+                if (s.Props.Type == EnumTransitionType.Perish)
+                {
+                    spoilState = s.TransitionLevel;
+                    break;
+                }
+            }
+        }
+        
         var containableProps = BlockLiquidContainerBase.GetContainableProps(__state.ContentStack);
 
         if (containableProps == null) return;
@@ -92,11 +105,7 @@ public class BlockLiquidContainerBasePatch
         if (stabilityBehavior == null) return;
 
         var stabilityGainTotal = stabilityGain * consumedSize * Math.Max(0.0f, 1f - spoilState) / containableProps.ItemsPerLitre;
-        // api.Logger.Debug(
-        //     "MakeTeaMod: entity [{0}] with stability {1:F3}, gain +{2:F3} stability using [{3}] liquid ({4:P1} spoiled) from container [{5}]",
-        //     byEntity.GetName(), stabilityBehavior.OwnStability, stabilityGainTotal, __state.ContentStack.GetName(),
-        //     spoilState, slot.Itemstack.GetName());
-
+        
         stabilityBehavior.OwnStability += stabilityGainTotal;
     }
 

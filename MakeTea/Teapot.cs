@@ -51,7 +51,7 @@ namespace MakeTea
                 var herbStacks = new List<ItemStack>();
                 foreach (CollectibleObject obj in api.World.Collectibles)
                 {
-                    if (ItemSlotTeapotInput.CanHold(obj.Code))
+                    if (ItemSlotTeapotInput.CanHold(api.World, obj))
                     {
                         var stacks = obj.GetHandBookStacks(capi);
                         if (stacks != null) herbStacks.AddRange(stacks);
@@ -747,7 +747,7 @@ namespace MakeTea
             else if (sourceStack?.Block is Teapot && sinkStack?.Block != null)
             {
                 // TODO: create a set of all tea ingredients from the recipes instead
-                if (!ItemSlotTeapotInput.CanHold(sinkStack.Block.Code)) return false;
+                if (!ItemSlotTeapotInput.CanHold(world, sinkStack.Block)) return false;
                 var teapotBlock = sourceStack.Block as Teapot;
                 var contents = teapotBlock.GetStacks(world, sourceStack);
                 var itemStack = contents.ElementAtOrDefault(ITEM_SLOT);

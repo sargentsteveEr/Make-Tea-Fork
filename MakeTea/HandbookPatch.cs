@@ -48,8 +48,8 @@ public static class HandbookPatch
             {
                 var herbIngredient = recipe.Ingredients.FirstOrDefault(s =>
                 {
-                    var anyCode = s.Code ?? (s.Codes != null && s.Codes.Length > 0 ? new AssetLocation(s.Codes[0]) : null);
-                    return anyCode != null && ItemSlotTeapotInput.CanHold(anyCode);
+                    var resolvedStack = s.ResolvedItemStack;
+                    return resolvedStack != null && !resolvedStack.Collectible.IsLiquid();
                 });
 
                 if (herbIngredient != null)
@@ -61,9 +61,8 @@ public static class HandbookPatch
                         var m = System.Math.Max(1, maxCandidateStack.Collectible.MaxStackSize);
                         maxCandidateStack.StackSize = m * 10;
 
-                        if (herbIngredient.Matches(maxCandidateStack, out _))
-
-                        if (ItemSlotTeapotInput.CanHold(maxCandidateStack.Collectible.Code)
+                        // Use the new dynamic CanHold method
+                        if (ItemSlotTeapotInput.CanHold(capi.World, maxCandidateStack.Collectible)
                             && herbIngredient.Matches(maxCandidateStack, out _))
 
                         {

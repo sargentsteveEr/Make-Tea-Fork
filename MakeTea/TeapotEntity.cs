@@ -12,10 +12,36 @@ namespace MakeTea
     class ItemSlotTeapotInput : ItemSlot
     {
 
-        public static bool CanHold(AssetLocation Code)
+        public static bool CanHold(IWorldAccessor world, CollectibleObject obj)
         {
-            string part = Code.FirstCodePart();
-            return part == "flower" || part == "spice" || part == "vegetable";
+            if (obj == null) return false;
+            
+            // Prevent players from putting liquids (like water or honey) into the solid herb slot
+            if (obj.IsLiquid()) return false;
+
+            var modSystem = world.Api.ModLoader.GetModSystem<MakeTeaModSystem>();
+            var recipes = modSystem?.GetTeapotRecipes();
+            if (recipes == null) return false;
+
+            // Check if the item matches ANY ingredient in ANY registered tea recipe
+            foreach (var recipe in recipes)
+            {
+                foreach (var ingred in recipe.Ingredients)
+                {
+                    if (ingred.Codes != null)
+                    {
+                        foreach (var code in ingred.Codes)
+                        {
+                            if (obj.WildCardMatch(new AssetLocation(code))) return true;
+                        }
+                    }
+                    else if (ingred.Code != null)
+                    {
+                        if (obj.WildCardMatch(ingred.Code)) return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private IWorldAccessor World;
@@ -33,8 +59,8 @@ namespace MakeTea
 
        public override bool CanHold(ItemSlot sourceSlot)
         {
-            AssetLocation code = sourceSlot?.Itemstack?.Collectible?.Code;
-            return code != null && CanHold(code);
+            if (sourceSlot?.Itemstack?.Collectible == null) return false;
+            return CanHold(World, sourceSlot.Itemstack.Collectible);
         }
 
         public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge)
